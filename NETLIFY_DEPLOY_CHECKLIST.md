@@ -6,7 +6,7 @@ Use this checklist each time you publish significant comic updates.
 
 - Preferred no-terminal workflow:
   - Double-click `Comic Manager.command` in Finder.
-  - Use the GUI to add/replace/delete comics.
+  - A local browser page opens for add/replace/delete comics.
 
 - Add/remove comics with the local admin tool:
 
@@ -65,6 +65,6 @@ git commit -m "Update comics content"
 
 ## 7. Ongoing content operations
 
-- Preferred workflow: `Comic Manager.command` GUI.
+- Preferred workflow: `Comic Manager.command` local browser app.
 - Use `python3 ./scripts/comic_admin.py add/delete/list` for all content changes.
 - Run `./scripts/release-prep.sh --apply-prune` before commits when adding large new image sets.
