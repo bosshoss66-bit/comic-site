@@ -26,6 +26,8 @@ Static comic library and reader designed for Netlify hosting.
 - `admin/`: Decap CMS setup.
 - `uploads/`: comic images.
 - `scripts/optimize-images.sh`: generates optimized `*.opt.jpg` files.
+- `scripts/prune-original-images.sh`: safely deletes originals once optimized replacements exist.
+- `scripts/release-prep.sh`: one-command pre-deploy check (optimize + prune check + validation + git status).
 
 ## Admin workflow (upload/delete comics)
 
@@ -53,6 +55,18 @@ Optional cleanup after optimization:
 ```bash
 ./scripts/prune-original-images.sh
 ./scripts/prune-original-images.sh --apply
+```
+
+One-command pre-release check:
+
+```bash
+./scripts/release-prep.sh
+```
+
+Apply pruning inside the same command:
+
+```bash
+./scripts/release-prep.sh --apply-prune
 ```
 
 What it does:

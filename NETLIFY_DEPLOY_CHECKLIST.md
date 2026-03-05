@@ -6,17 +6,16 @@ Use this checklist each time you publish significant comic updates.
 
 - Confirm `data/comics.json` entries are valid (slug/title/cover/pages).
 - Ensure page order is correct for every comic.
-- Generate optimized image variants:
+- Preferred one-command workflow:
 
 ```bash
-./scripts/optimize-images.sh
+./scripts/release-prep.sh
 ```
 
-- Optional, to reduce repo size by removing originals that have optimized copies:
+- If you also want to prune originals in the same run:
 
 ```bash
-./scripts/prune-original-images.sh
-./scripts/prune-original-images.sh --apply
+./scripts/release-prep.sh --apply-prune
 ```
 
 ## 2. Git update
