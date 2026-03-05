@@ -269,16 +269,19 @@ class ManagerHandler(BaseHTTPRequestHandler):
         self.wfile.write(body)
 
     def do_POST(self) -> None:  # noqa: N802
-        if self.path == "/add":
-            self._handle_add()
-            return
-        if self.path == "/delete":
-            self._handle_delete()
-            return
-        if self.path == "/publish":
-            self._handle_publish()
-            return
-        self._send_not_found()
+        try:
+            if self.path == "/add":
+                self._handle_add()
+                return
+            if self.path == "/delete":
+                self._handle_delete()
+                return
+            if self.path == "/publish":
+                self._handle_publish()
+                return
+            self._send_not_found()
+        except Exception as error:  # pragma: no cover
+            self._redirect(f"Request failed: {error}", error=True)
 
     def _handle_add(self) -> None:
         content_length = int(self.headers.get("Content-Length", "0") or "0")
@@ -286,35 +289,35 @@ class ManagerHandler(BaseHTTPRequestHandler):
             self._redirect("Upload too large. Keep total files under 500MB.", error=True)
             return
 
-        form = cgi.FieldStorage(
-            fp=self.rfile,
-            headers=self.headers,
-            environ={
-                "REQUEST_METHOD": "POST",
-                "CONTENT_TYPE": self.headers.get("Content-Type", ""),
-            },
-        )
-
-        slug = (form.getfirst("slug") or "").strip()
-        title = (form.getfirst("title") or "").strip()
-        description = (form.getfirst("description") or "").strip()
-        replace = parse_bool(form.getfirst("replace"))
-
-        pages_field = form["pages"] if "pages" in form else None
-        if pages_field is None:
-            self._redirect("No page images were uploaded.", error=True)
-            return
-
-        page_items = pages_field if isinstance(pages_field, list) else [pages_field]
-        page_items = [item for item in page_items if getattr(item, "filename", "")]
-        if not page_items:
-            self._redirect("No page images were uploaded.", error=True)
-            return
-
-        cover_item = form["cover"] if "cover" in form else None
-        has_cover = bool(cover_item and getattr(cover_item, "filename", ""))
-
         try:
+            form = cgi.FieldStorage(
+                fp=self.rfile,
+                headers=self.headers,
+                environ={
+                    "REQUEST_METHOD": "POST",
+                    "CONTENT_TYPE": self.headers.get("Content-Type", ""),
+                },
+            )
+
+            slug = (form.getfirst("slug") or "").strip()
+            title = (form.getfirst("title") or "").strip()
+            description = (form.getfirst("description") or "").strip()
+            replace = parse_bool(form.getfirst("replace"))
+
+            pages_field = form["pages"] if "pages" in form else None
+            if pages_field is None:
+                self._redirect("No page images were uploaded.", error=True)
+                return
+
+            page_items = pages_field if isinstance(pages_field, list) else [pages_field]
+            page_items = [item for item in page_items if getattr(item, "filename", "")]
+            if not page_items:
+                self._redirect("No page images were uploaded.", error=True)
+                return
+
+            cover_item = form["cover"] if "cover" in form else None
+            has_cover = cover_item is not None and bool(getattr(cover_item, "filename", ""))
+
             with tempfile.TemporaryDirectory(prefix="comic-manager-") as tmp_dir:
                 tmp_path = Path(tmp_dir)
                 pages_dir = tmp_path / "pages"
