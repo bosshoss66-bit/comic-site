@@ -2,6 +2,8 @@
 
 Static comic library and reader designed for Netlify hosting.
 
+Live URL: [https://badkyndcomics.netlify.app](https://badkyndcomics.netlify.app)
+
 ## What is implemented
 
 - Homepage comic grid with thumbnails, title, description, and page count.

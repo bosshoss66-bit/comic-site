@@ -29,6 +29,7 @@ import comic_admin
 HOST = "127.0.0.1"
 DEFAULT_PORT = 8766
 MAX_UPLOAD_BYTES = 500 * 1024 * 1024  # 500 MB
+LIVE_SITE_URL = "https://badkyndcomics.netlify.app"
 
 
 def esc(text: str) -> str:
@@ -151,7 +152,10 @@ def render_page(message: str = "", is_error: bool = False) -> bytes:
 </head>
 <body>
   <h1>Comic Manager</h1>
-  <p class="hint">Local admin panel for adding/removing comics in this repo. After changes, commit + push to deploy on Netlify.</p>
+  <p class="hint">
+    Local admin panel for adding/removing comics in this repo.
+    Live site: <a href="{esc(LIVE_SITE_URL)}" target="_blank" rel="noopener">{esc(LIVE_SITE_URL)}</a>
+  </p>
   {status_html}
 
   <div class="layout">

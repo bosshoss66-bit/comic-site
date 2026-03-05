@@ -10,8 +10,8 @@ local_backend: true
 media_folder: "uploads"
 public_folder: "/uploads"
 
-site_url: "/"
-display_url: "/"
+site_url: "https://badkyndcomics.netlify.app"
+display_url: "https://badkyndcomics.netlify.app"
 logo_url: "/uploads/marshmallow-man/cover.opt.jpg"
 
 collections:
