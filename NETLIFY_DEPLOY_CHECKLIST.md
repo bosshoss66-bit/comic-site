@@ -4,6 +4,14 @@ Use this checklist each time you publish significant comic updates.
 
 ## 1. Local content preparation
 
+- Add/remove comics with the local admin tool:
+
+```bash
+python3 ./scripts/comic_admin.py list
+python3 ./scripts/comic_admin.py add --slug your-comic --title "Your Comic" --description "Short description" --source-dir "/path/to/images"
+python3 ./scripts/comic_admin.py delete --slug old-comic --delete-files
+```
+
 - Confirm `data/comics.json` entries are valid (slug/title/cover/pages).
 - Ensure page order is correct for every comic.
 - Preferred one-command workflow:
@@ -38,14 +46,10 @@ git commit -m "Update comics content"
 - Publish directory: `.`
 - Confirm `netlify.toml` and `_redirects` are included in deploy.
 
-## 5. Netlify admin setup
+## 5. Optional browser admin
 
-- Create a GitHub OAuth App:
-  - Homepage URL: your Netlify project URL
-  - Callback URL: `https://api.netlify.com/auth/done`
-- In Netlify Project configuration -> Access & security -> OAuth, install GitHub provider.
-- Paste Client ID and Client Secret from GitHub OAuth App.
-- Verify `/admin/` login works with GitHub.
+- Browser admin (`/admin`) is optional and can be skipped.
+- Recommended production workflow is local script updates + git push.
 
 ## 6. Post-deploy smoke test
 
@@ -57,5 +61,5 @@ git commit -m "Update comics content"
 
 ## 7. Ongoing content operations
 
-- Admins can add or delete comics in `/admin/` by editing `data/comics.json` through CMS.
-- If image optimization is required for newly uploaded images, run optimization scripts from a local clone and push changes.
+- Use `python3 ./scripts/comic_admin.py add/delete/list` for all content changes.
+- Run `./scripts/release-prep.sh --apply-prune` before commits when adding large new image sets.

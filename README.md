@@ -12,7 +12,7 @@ Static comic library and reader designed for Netlify hosting.
 - Reader preloads adjacent pages for smoother transitions.
 - Zoom controls for easier reading on smaller screens.
 - Accessible controls, focus states, and responsive layout.
-- `/admin` editor for adding/removing comics and uploading images.
+- Local admin CLI for adding/removing comics and uploading images (no browser auth required).
 
 ## Project structure
 
@@ -23,27 +23,53 @@ Static comic library and reader designed for Netlify hosting.
 - `js/app.js`: homepage rendering.
 - `js/reader.js`: reader behavior.
 - `data/comics.json`: comic catalog (admin editable).
-- `admin/`: Decap CMS setup.
 - `uploads/`: comic images.
+- `scripts/comic_admin.py`: primary add/delete/list content manager.
 - `scripts/optimize-images.sh`: generates optimized `*.opt.jpg` files.
 - `scripts/prune-original-images.sh`: safely deletes originals once optimized replacements exist.
 - `scripts/release-prep.sh`: one-command pre-deploy check (optimize + prune check + validation + git status).
 - `scripts/push-main.sh`: configures `origin` (optional URL arg) and pushes `main`.
 
-## Admin workflow (upload/delete comics)
+## Content workflow (recommended)
 
-1. Create a GitHub OAuth App in your GitHub account:
-   - Homepage URL: your Netlify site URL (for example `https://incredible-sunshine-acf1bf.netlify.app`)
-   - Authorization callback URL: `https://api.netlify.com/auth/done`
-2. In Netlify, open this project and go to **Project configuration -> Access & security -> OAuth**.
-3. Install the **GitHub** provider and paste the OAuth App Client ID and Client Secret.
-4. Open `/admin/` on your deployed site and choose GitHub login.
-5. Open **Comics Data**.
-6. Add a comic entry, upload a cover image, and upload page images in order.
-7. Remove a comic entry to delete it from the site.
-8. Save/publish to commit content changes into the GitHub repo.
+This is the primary update path and does not depend on Netlify/GitHub popup auth.
 
-Note: deleting a comic entry removes it from the catalog immediately, but uploaded image files may still remain in `uploads/` unless manually deleted.
+1. Add a comic from a folder of page images:
+
+```bash
+python3 ./scripts/comic_admin.py add \
+  --slug your-comic-slug \
+  --title "Your Comic Title" \
+  --description "Short description" \
+  --source-dir "/absolute/path/to/page-images"
+```
+
+2. List comics:
+
+```bash
+python3 ./scripts/comic_admin.py list
+```
+
+3. Delete a comic entry (keep files):
+
+```bash
+python3 ./scripts/comic_admin.py delete --slug your-comic-slug
+```
+
+4. Delete a comic entry and uploaded files:
+
+```bash
+python3 ./scripts/comic_admin.py delete --slug your-comic-slug --delete-files
+```
+
+5. Prepare and publish updates:
+
+```bash
+./scripts/release-prep.sh --apply-prune
+git add .
+git commit -m "Update comic library"
+git push
+```
 
 ## Image optimization workflow
 
