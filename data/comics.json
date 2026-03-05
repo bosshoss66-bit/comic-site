@@ -8,45 +8,15 @@
       "slug": "marshmallow-man-episode-one",
       "title": "Marshmallow Man: Episode One",
       "description": "The first A4 chapter of Marshmallow Man.",
-      "cover": "/uploads/marshmallow-man/cover.jpg",
+      "cover": "/uploads/marshmallow-man/cover.opt.jpg",
       "pages": [
-        "/uploads/marshmallow-man/001.jpg",
-        "/uploads/marshmallow-man/002.jpg",
-        "/uploads/marshmallow-man/003.jpg",
-        "/uploads/marshmallow-man/004.jpg",
-        "/uploads/marshmallow-man/005.jpg",
-        "/uploads/marshmallow-man/006.jpg",
-        "/uploads/marshmallow-man/007.jpg"
-      ]
-    },
-    {
-      "slug": "celery-man-episode-one",
-      "title": "Celery Man: Episode One",
-      "description": "Seven pages of crunchy heroics.",
-      "cover": "/uploads/celery-man/cover.jpg",
-      "pages": [
-        "/uploads/celery-man/001.jpg",
-        "/uploads/celery-man/002.jpg",
-        "/uploads/celery-man/003.jpg",
-        "/uploads/celery-man/004.jpg",
-        "/uploads/celery-man/005.jpg",
-        "/uploads/celery-man/006.jpg",
-        "/uploads/celery-man/007.jpg"
-      ]
-    },
-    {
-      "slug": "pumpkin-man-episode-one",
-      "title": "Pumpkin Man: Episode One",
-      "description": "A bright, spooky first issue.",
-      "cover": "/uploads/pumpkin-man/cover.jpg",
-      "pages": [
-        "/uploads/pumpkin-man/001.jpg",
-        "/uploads/pumpkin-man/002.jpg",
-        "/uploads/pumpkin-man/003.jpg",
-        "/uploads/pumpkin-man/004.jpg",
-        "/uploads/pumpkin-man/005.jpg",
-        "/uploads/pumpkin-man/006.jpg",
-        "/uploads/pumpkin-man/007.jpg"
+        "/uploads/marshmallow-man/001.opt.jpg",
+        "/uploads/marshmallow-man/002.opt.jpg",
+        "/uploads/marshmallow-man/003.opt.jpg",
+        "/uploads/marshmallow-man/004.opt.jpg",
+        "/uploads/marshmallow-man/005.opt.jpg",
+        "/uploads/marshmallow-man/006.opt.jpg",
+        "/uploads/marshmallow-man/007.opt.jpg"
       ]
     }
   ]

@@ -41,8 +41,8 @@ Static comic library and reader designed for Netlify hosting.
 3. In the app:
    - Use **Add / Replace Comic** to load new comic pages from an image folder.
    - Use **Delete Selected Comic** to remove old comics (optionally remove files too).
-4. After content edits, publish changes to GitHub:
-   - Use your preferred Git app, or ask me to run the push commands for you.
+4. After content edits, use **Publish Changes** in the app:
+   - This runs preflight checks, creates a commit, and pushes to GitHub.
 
 ## CLI workflow (optional)
 

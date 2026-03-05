@@ -11,6 +11,7 @@ import cgi
 import html
 import socket
 import socketserver
+import subprocess
 import tempfile
 import urllib.parse
 import webbrowser
@@ -204,6 +205,31 @@ def render_page(message: str = "", is_error: bool = False) -> bytes:
       <p class="hint">Delete removes from <code>data/comics.json</code> and optionally from <code>uploads/</code>.</p>
     </section>
 
+    <section class="card">
+      <h2>Publish to GitHub</h2>
+      <form method="post" action="/publish">
+        <label for="commit_message">Commit Message</label>
+        <input
+          id="commit_message"
+          name="commit_message"
+          type="text"
+          placeholder="Update comic library"
+          value="Update comic library"
+        />
+
+        <div class="row">
+          <label><input type="checkbox" name="apply_prune" checked /> Run image prune during preflight</label>
+        </div>
+
+        <div class="row">
+          <button type="submit">Publish Changes</button>
+        </div>
+      </form>
+      <p class="hint">
+        Runs release preflight, stages all changes, creates a commit, and pushes to <code>origin/main</code>.
+      </p>
+    </section>
+
     <section class="card full">
       <h2>Current Comics</h2>
       <table>
@@ -248,6 +274,9 @@ class ManagerHandler(BaseHTTPRequestHandler):
             return
         if self.path == "/delete":
             self._handle_delete()
+            return
+        if self.path == "/publish":
+            self._handle_publish()
             return
         self._send_not_found()
 
@@ -336,6 +365,82 @@ class ManagerHandler(BaseHTTPRequestHandler):
             self._redirect(f"Deleted comic '{removed.get('title', slug)}'.", error=False)
         except Exception as error:  # pragma: no cover
             self._redirect(str(error), error=True)
+
+    @staticmethod
+    def _run_command(command: list[str]) -> subprocess.CompletedProcess:
+        return subprocess.run(
+            command,
+            cwd=SCRIPT_DIR.parent,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+
+    @staticmethod
+    def _compact_output(result: subprocess.CompletedProcess, limit: int = 300) -> str:
+        text = (result.stdout or "") + ("\n" + result.stderr if result.stderr else "")
+        text = " ".join(text.strip().split())
+        return text[:limit]
+
+    def _handle_publish(self) -> None:
+        content_length = int(self.headers.get("Content-Length", "0") or "0")
+        raw = self.rfile.read(content_length)
+        params = urllib.parse.parse_qs(raw.decode("utf-8", errors="replace"))
+
+        commit_message = (params.get("commit_message", [""])[0] or "").strip() or "Update comic library"
+        apply_prune = parse_bool(params.get("apply_prune", ["0"])[0])
+
+        prep_command = ["./scripts/release-prep.sh", "--apply-prune"] if apply_prune else ["./scripts/release-prep.sh"]
+        prep = self._run_command(prep_command)
+        if prep.returncode != 0:
+            details = self._compact_output(prep)
+            message = "Preflight failed."
+            if details:
+                message += f" {details}"
+            self._redirect(message, error=True)
+            return
+
+        add = self._run_command(["git", "add", "."])
+        if add.returncode != 0:
+            details = self._compact_output(add)
+            message = "git add failed."
+            if details:
+                message += f" {details}"
+            self._redirect(message, error=True)
+            return
+
+        staged = self._run_command(["git", "diff", "--cached", "--quiet"])
+        if staged.returncode == 0:
+            self._redirect("No changes to publish.", error=False)
+            return
+        if staged.returncode not in (0, 1):
+            self._redirect("Could not determine staged changes.", error=True)
+            return
+
+        commit = self._run_command(["git", "commit", "-m", commit_message])
+        if commit.returncode != 0:
+            details = self._compact_output(commit)
+            message = "git commit failed."
+            if details:
+                message += f" {details}"
+            self._redirect(message, error=True)
+            return
+
+        push = self._run_command(["git", "push"])
+        if push.returncode != 0:
+            details = self._compact_output(push)
+            message = "git push failed."
+            if details:
+                message += f" {details}"
+            self._redirect(message, error=True)
+            return
+
+        new_head = self._run_command(["git", "rev-parse", "--short", "HEAD"])
+        commit_hash = self._compact_output(new_head, limit=16) if new_head.returncode == 0 else ""
+        done_message = "Published to GitHub successfully."
+        if commit_hash:
+            done_message += f" Commit {commit_hash}."
+        self._redirect(done_message, error=False)
 
     def _redirect(self, message: str, error: bool) -> None:
         query = urllib.parse.urlencode({"message": message, "error": "1" if error else "0"})

@@ -7,6 +7,7 @@ Use this checklist each time you publish significant comic updates.
 - Preferred no-terminal workflow:
   - Double-click `Comic Manager.command` in Finder.
   - A local browser page opens for add/replace/delete comics.
+  - Use **Publish Changes** in the app when ready to deploy updates.
 
 - Add/remove comics with the local admin tool:
 
