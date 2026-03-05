@@ -13,6 +13,7 @@ Static comic library and reader designed for Netlify hosting.
 - Zoom controls for easier reading on smaller screens.
 - Accessible controls, focus states, and responsive layout.
 - Local admin CLI for adding/removing comics and uploading images (no browser auth required).
+- Local desktop GUI app for adding/removing comics (no terminal required).
 
 ## Project structure
 
@@ -24,15 +25,27 @@ Static comic library and reader designed for Netlify hosting.
 - `js/reader.js`: reader behavior.
 - `data/comics.json`: comic catalog (admin editable).
 - `uploads/`: comic images.
+- `Comic Manager.command`: double-click launcher for the local GUI app.
 - `scripts/comic_admin.py`: primary add/delete/list content manager.
+- `scripts/comic_manager_gui.py`: desktop GUI for add/delete comic operations.
 - `scripts/optimize-images.sh`: generates optimized `*.opt.jpg` files.
 - `scripts/prune-original-images.sh`: safely deletes originals once optimized replacements exist.
 - `scripts/release-prep.sh`: one-command pre-deploy check (optimize + prune check + validation + git status).
 - `scripts/push-main.sh`: configures `origin` (optional URL arg) and pushes `main`.
 
-## Content workflow (recommended)
+## Content workflow (recommended, no terminal required)
 
-This is the primary update path and does not depend on Netlify/GitHub popup auth.
+1. In Finder, open this folder and double-click:
+   - `Comic Manager.command`
+2. In the app:
+   - Use **Add / Replace Comic** to load new comic pages from an image folder.
+   - Use **Delete Selected Comic** to remove old comics (optionally remove files too).
+3. After content edits, publish changes to GitHub:
+   - Use your preferred Git app, or ask me to run the push commands for you.
+
+## CLI workflow (optional)
+
+This is the advanced/manual path and also does not depend on Netlify/GitHub popup auth.
 
 1. Add a comic from a folder of page images:
 

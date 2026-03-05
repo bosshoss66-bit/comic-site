@@ -94,27 +94,30 @@ def find_comic_index(comics: list[dict], slug: str) -> int:
     return -1
 
 
-def cmd_list(_: argparse.Namespace) -> int:
+def get_comics() -> list[dict]:
     data = load_data()
     comics = data.get("comics", [])
-    if not comics:
-        print("No comics found.")
-        return 0
-
-    for comic in comics:
-        pages = comic.get("pages", [])
-        print(f"{comic.get('slug')} | {comic.get('title')} | pages={len(pages)}")
-    return 0
+    return comics
 
 
-def cmd_add(args: argparse.Namespace) -> int:
-    slug = args.slug.strip().lower()
-    title = args.title.strip()
-    description = args.description.strip()
-    source_dir = Path(args.source_dir).expanduser().resolve()
+def add_comic(
+    *,
+    slug: str,
+    title: str,
+    description: str,
+    source_dir: Path,
+    cover: Path | None = None,
+    replace: bool = False,
+) -> dict:
+    slug = slug.strip().lower()
+    title = title.strip()
+    description = description.strip()
+    source_dir = source_dir.expanduser().resolve()
 
     if not re.fullmatch(r"[a-z0-9-]+", slug):
         raise ValueError("Slug must use lowercase letters, numbers, and dashes only.")
+    if not title:
+        raise ValueError("Title is required.")
     if not source_dir.is_dir():
         raise ValueError(f"Source folder not found: {source_dir}")
 
@@ -128,15 +131,15 @@ def cmd_add(args: argparse.Namespace) -> int:
     target_dir = UPLOADS_DIR / slug
 
     if existing_index >= 0:
-        if not args.replace:
-            raise ValueError(f"Slug '{slug}' already exists. Use --replace to overwrite.")
+        if not replace:
+            raise ValueError(f"Slug '{slug}' already exists. Enable replace to overwrite.")
         comics.pop(existing_index)
         if target_dir.exists():
             shutil.rmtree(target_dir)
 
     target_dir.mkdir(parents=True, exist_ok=True)
 
-    cover_source = Path(args.cover).expanduser().resolve() if args.cover else images[0]
+    cover_source = cover.expanduser().resolve() if cover else images[0]
     if not cover_source.exists():
         raise ValueError(f"Cover image not found: {cover_source}")
 
@@ -160,13 +163,11 @@ def cmd_add(args: argparse.Namespace) -> int:
 
     comics.append(comic)
     save_data(data)
-
-    print(f"Added comic '{title}' ({slug}) with {len(page_paths)} pages.")
-    return 0
+    return comic
 
 
-def cmd_delete(args: argparse.Namespace) -> int:
-    slug = args.slug.strip().lower()
+def delete_comic(*, slug: str, delete_files: bool = False) -> dict:
+    slug = slug.strip().lower()
     data = load_data()
     comics = data.get("comics", [])
     idx = find_comic_index(comics, slug)
@@ -176,12 +177,44 @@ def cmd_delete(args: argparse.Namespace) -> int:
     removed = comics.pop(idx)
     save_data(data)
 
-    if args.delete_files:
+    if delete_files:
         target_dir = UPLOADS_DIR / slug
         if target_dir.exists() and target_dir.is_dir():
             shutil.rmtree(target_dir)
 
-    print(f"Deleted comic '{removed.get('title')}' ({slug}).")
+    return removed
+
+
+def cmd_list(_: argparse.Namespace) -> int:
+    comics = get_comics()
+    if not comics:
+        print("No comics found.")
+        return 0
+
+    for comic in comics:
+        pages = comic.get("pages", [])
+        print(f"{comic.get('slug')} | {comic.get('title')} | pages={len(pages)}")
+    return 0
+
+
+def cmd_add(args: argparse.Namespace) -> int:
+    comic = add_comic(
+        slug=args.slug,
+        title=args.title,
+        description=args.description,
+        source_dir=Path(args.source_dir),
+        cover=Path(args.cover) if args.cover else None,
+        replace=args.replace,
+    )
+    print(
+        f"Added comic '{comic.get('title')}' ({comic.get('slug')}) with {len(comic.get('pages', []))} pages."
+    )
+    return 0
+
+
+def cmd_delete(args: argparse.Namespace) -> int:
+    removed = delete_comic(slug=args.slug, delete_files=args.delete_files)
+    print(f"Deleted comic '{removed.get('title')}' ({removed.get('slug')}).")
     return 0
 
 
