@@ -17,6 +17,7 @@ import urllib.parse
 import webbrowser
 from http.server import BaseHTTPRequestHandler
 from pathlib import Path
+from typing import Any
 
 import sys
 
@@ -30,6 +31,7 @@ HOST = "127.0.0.1"
 DEFAULT_PORT = 8766
 MAX_UPLOAD_BYTES = 500 * 1024 * 1024  # 500 MB
 LIVE_SITE_URL = "https://badkyndcomics.netlify.app"
+ROOT_DIR = SCRIPT_DIR.parent
 
 
 def esc(text: str) -> str:
@@ -40,6 +42,83 @@ def parse_bool(value: str | None) -> bool:
     if value is None:
         return False
     return value.lower() in {"1", "true", "on", "yes"}
+
+
+def run_local_command(command: list[str]) -> subprocess.CompletedProcess:
+    return subprocess.run(command, cwd=ROOT_DIR, text=True, capture_output=True, check=False)
+
+
+def git_text(args: list[str]) -> str:
+    result = run_local_command(["git", *args])
+    if result.returncode != 0:
+        return ""
+    return (result.stdout or "").strip()
+
+
+def normalize_repo_url(remote_url: str) -> str:
+    raw = remote_url.strip()
+    if not raw:
+        return ""
+    if raw.startswith("git@github.com:"):
+        raw = "https://github.com/" + raw.removeprefix("git@github.com:")
+    if raw.endswith(".git"):
+        raw = raw[:-4]
+    return raw
+
+
+def get_netlify_project_slug(live_site_url: str) -> str:
+    parsed = urllib.parse.urlparse(live_site_url)
+    host = parsed.netloc.split(":")[0]
+    if host.endswith(".netlify.app"):
+        return host.split(".")[0]
+    return ""
+
+
+def get_deployment_status() -> dict[str, Any]:
+    branch = git_text(["branch", "--show-current"]) or "unknown"
+    head_short = git_text(["rev-parse", "--short", "HEAD"]) or "unknown"
+    head_full = git_text(["rev-parse", "HEAD"])
+    head_subject = git_text(["log", "-1", "--pretty=%s"]) or ""
+    porcelain = git_text(["status", "--porcelain"])
+    working_clean = not bool(porcelain)
+    remote_url = normalize_repo_url(git_text(["remote", "get-url", "origin"]))
+
+    sync_state = "Unknown"
+    ahead = behind = 0
+    ahead_behind = run_local_command(["git", "rev-list", "--left-right", "--count", "origin/main...HEAD"])
+    if ahead_behind.returncode == 0:
+        parts = (ahead_behind.stdout or "").strip().split()
+        if len(parts) == 2 and all(p.isdigit() for p in parts):
+            behind = int(parts[0])
+            ahead = int(parts[1])
+            if ahead == 0 and behind == 0:
+                sync_state = "Synced with origin/main"
+            elif ahead > 0 and behind == 0:
+                sync_state = f"Ahead by {ahead} commit(s)"
+            elif ahead == 0 and behind > 0:
+                sync_state = f"Behind by {behind} commit(s)"
+            else:
+                sync_state = f"Diverged (ahead {ahead}, behind {behind})"
+
+    netlify_project_slug = get_netlify_project_slug(LIVE_SITE_URL)
+    netlify_project_url = f"https://app.netlify.com/projects/{netlify_project_slug}" if netlify_project_slug else ""
+    netlify_deploys_url = f"{netlify_project_url}/deploys" if netlify_project_url else ""
+
+    commit_url = f"{remote_url}/commit/{head_full}" if remote_url and head_full else ""
+    commits_url = f"{remote_url}/commits/main" if remote_url else ""
+
+    return {
+        "branch": branch,
+        "head_short": head_short,
+        "head_subject": head_subject,
+        "working_clean": working_clean,
+        "sync_state": sync_state,
+        "remote_url": remote_url,
+        "commit_url": commit_url,
+        "commits_url": commits_url,
+        "netlify_project_url": netlify_project_url,
+        "netlify_deploys_url": netlify_deploys_url,
+    }
 
 
 def comic_rows(comics: list[dict]) -> str:
@@ -74,9 +153,55 @@ def comic_options(comics: list[dict]) -> str:
     return "\n".join(options)
 
 
+def render_deployment_panel(status: dict[str, Any]) -> str:
+    head_line = esc(status["head_short"])
+    if status["head_subject"]:
+        head_line += f" - {esc(status['head_subject'])}"
+
+    clean_text = "Clean working tree" if status["working_clean"] else "Uncommitted changes present"
+
+    links: list[str] = []
+    if status["remote_url"]:
+        links.append(
+            f"<a href='{esc(status['remote_url'])}' target='_blank' rel='noopener'>GitHub Repository</a>"
+        )
+    if status["commit_url"]:
+        links.append(
+            f"<a href='{esc(status['commit_url'])}' target='_blank' rel='noopener'>Latest Commit</a>"
+        )
+    if status["commits_url"]:
+        links.append(
+            f"<a href='{esc(status['commits_url'])}' target='_blank' rel='noopener'>Commit History</a>"
+        )
+    if status["netlify_project_url"]:
+        links.append(
+            f"<a href='{esc(status['netlify_project_url'])}' target='_blank' rel='noopener'>Netlify Project</a>"
+        )
+    if status["netlify_deploys_url"]:
+        links.append(
+            f"<a href='{esc(status['netlify_deploys_url'])}' target='_blank' rel='noopener'>Netlify Deploys</a>"
+        )
+
+    links_html = " | ".join(links) if links else "No remote/deploy links available."
+
+    return (
+        "<section class='card'>"
+        "<h2>Deployment Status</h2>"
+        "<div class='status-list'>"
+        f"<p><strong>Branch:</strong> {esc(status['branch'])}</p>"
+        f"<p><strong>Latest Local Commit:</strong> {head_line}</p>"
+        f"<p><strong>Repo State:</strong> {esc(clean_text)}</p>"
+        f"<p><strong>Sync:</strong> {esc(status['sync_state'])}</p>"
+        "</div>"
+        f"<p class='hint'>{links_html}</p>"
+        "</section>"
+    )
+
+
 def render_page(message: str = "", is_error: bool = False) -> bytes:
     comics = comic_admin.get_comics()
     comics = sorted(comics, key=lambda c: (c.get("title", "").lower(), c.get("slug", "").lower()))
+    deploy = get_deployment_status()
 
     status_class = "status error" if is_error else "status ok"
     status_html = (
@@ -147,6 +272,7 @@ def render_page(message: str = "", is_error: bool = False) -> bytes:
     th, td {{ border-top: 1px solid var(--line); padding: 7px 8px; text-align: left; vertical-align: top; }}
     th {{ color: var(--ink-soft); font-size: 12px; text-transform: uppercase; letter-spacing: .05em; }}
     .hint {{ color: var(--ink-soft); font-size: 13px; margin-top: 8px; }}
+    .status-list p {{ margin: 0 0 6px; }}
     @media (max-width: 980px) {{ .layout {{ grid-template-columns: 1fr; }} }}
   </style>
 </head>
@@ -233,6 +359,8 @@ def render_page(message: str = "", is_error: bool = False) -> bytes:
         Runs release preflight, stages all changes, creates a commit, and pushes to <code>origin/main</code>.
       </p>
     </section>
+
+    {render_deployment_panel(deploy)}
 
     <section class="card full">
       <h2>Current Comics</h2>
@@ -375,13 +503,7 @@ class ManagerHandler(BaseHTTPRequestHandler):
 
     @staticmethod
     def _run_command(command: list[str]) -> subprocess.CompletedProcess:
-        return subprocess.run(
-            command,
-            cwd=SCRIPT_DIR.parent,
-            text=True,
-            capture_output=True,
-            check=False,
-        )
+        return run_local_command(command)
 
     @staticmethod
     def _compact_output(result: subprocess.CompletedProcess, limit: int = 300) -> str:

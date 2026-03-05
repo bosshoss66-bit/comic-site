@@ -43,6 +43,7 @@ Live URL: [https://badkyndcomics.netlify.app](https://badkyndcomics.netlify.app)
 3. In the app:
    - Use **Add / Replace Comic** to load new comic pages from an image folder.
    - Use **Delete Selected Comic** to remove old comics (optionally remove files too).
+   - Check the **Deployment Status** panel for branch/sync info and quick GitHub/Netlify links.
 4. After content edits, use **Publish Changes** in the app:
    - This runs preflight checks, creates a commit, and pushes to GitHub.
 
