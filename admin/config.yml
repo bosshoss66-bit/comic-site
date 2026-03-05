@@ -9,7 +9,7 @@ public_folder: "/uploads"
 
 site_url: "/"
 display_url: "/"
-logo_url: "/uploads/marshmallow-man/cover.jpg"
+logo_url: "/uploads/marshmallow-man/cover.opt.jpg"
 
 collections:
   - name: "library"

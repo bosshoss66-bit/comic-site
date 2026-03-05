@@ -48,11 +48,19 @@ Run this before committing large new comic uploads:
 ./scripts/optimize-images.sh
 ```
 
+Optional cleanup after optimization:
+
+```bash
+./scripts/prune-original-images.sh
+./scripts/prune-original-images.sh --apply
+```
+
 What it does:
 
 - Scans `uploads/` for `jpg/jpeg/png`.
 - Creates `*.opt.jpg` files (resized + compressed) beside originals.
 - The site automatically prefers `*.opt.jpg` and falls back to originals if missing.
+- The prune script removes originals only when matching `*.opt.jpg` files exist.
 
 ## Local preview
 
@@ -80,6 +88,8 @@ Open [http://localhost:8888](http://localhost:8888). The app auto-falls back to 
 4. Deploy.
 
 Netlify will apply routing using `netlify.toml`.
+
+Deployment steps are also listed in [NETLIFY_DEPLOY_CHECKLIST.md](./NETLIFY_DEPLOY_CHECKLIST.md).
 
 ## Git setup
 
