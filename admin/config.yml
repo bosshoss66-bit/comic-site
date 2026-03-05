@@ -1,0 +1,62 @@
+backend:
+  name: git-gateway
+  branch: main
+
+local_backend: true
+
+media_folder: "uploads"
+public_folder: "/uploads"
+
+site_url: "/"
+display_url: "/"
+logo_url: "/uploads/marshmallow-man/cover.jpg"
+
+collections:
+  - name: "library"
+    label: "Comic Library"
+    files:
+      - label: "Comics Data"
+        name: "comics-data"
+        file: "data/comics.json"
+        format: "json"
+        fields:
+          - label: "Site"
+            name: "site"
+            widget: "object"
+            fields:
+              - label: "Site Title"
+                name: "title"
+                widget: "string"
+              - label: "Site Description"
+                name: "description"
+                widget: "text"
+          - label: "Comics"
+            name: "comics"
+            widget: "list"
+            summary: "{{fields.title}} ({{fields.slug}})"
+            allow_add: true
+            collapsed: true
+            fields:
+              - label: "Slug"
+                name: "slug"
+                widget: "string"
+                hint: "Use lowercase letters, numbers, and dashes only. Example: marshmallow-man-episode-two"
+              - label: "Title"
+                name: "title"
+                widget: "string"
+              - label: "Description"
+                name: "description"
+                widget: "text"
+              - label: "Cover Image"
+                name: "cover"
+                widget: "image"
+                choose_url: false
+              - label: "Pages"
+                name: "pages"
+                widget: "list"
+                allow_add: true
+                field:
+                  label: "Page Image"
+                  name: "page"
+                  widget: "image"
+                  choose_url: false

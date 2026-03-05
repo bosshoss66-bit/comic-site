@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Oracle Comics Library</title>
+    <meta name="description" content="Browse and read Oracle comic series online." />
+    <meta property="og:title" content="Oracle Comics Library" />
+    <meta property="og:description" content="A4 comic strips with an easy online reader." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/uploads/marshmallow-man/cover.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body class="home-page">
+    <header class="site-header">
+      <p class="eyebrow">Oracle Presents</p>
+      <h1>Comic Vault</h1>
+      <p class="subtitle">A4 adventures, one page at a time.</p>
+    </header>
+
+    <main class="content-wrap">
+      <section class="continue-panel" id="continue-panel" hidden>
+        <h2>Continue Reading</h2>
+        <a class="continue-link" id="continue-link" href="#"></a>
+      </section>
+
+      <section>
+        <div class="section-heading-row">
+          <h2>Comic Series</h2>
+          <p class="hint">Tap a cover to start from page 1.</p>
+        </div>
+        <div class="comic-grid" id="comic-grid" aria-live="polite"></div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>Hosted on Netlify. Admin editor: <a href="/admin/">/admin</a></p>
+    </footer>
+
+    <script type="module" src="/js/app.js"></script>
+  </body>
+</html>

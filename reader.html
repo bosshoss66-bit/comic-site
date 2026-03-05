@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Comic Reader | Oracle Comics</title>
+    <meta name="description" content="Read Oracle comic pages online." />
+    <meta property="og:title" content="Oracle Comic Reader" />
+    <meta property="og:description" content="Read page-by-page with keyboard and swipe controls." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/uploads/marshmallow-man/cover.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body class="reader-page">
+    <header class="reader-header">
+      <a class="back-link" href="/">Back to all comics</a>
+      <div>
+        <p class="eyebrow" id="reader-eyebrow">Loading comic...</p>
+        <h1 id="comic-title">Comic Reader</h1>
+      </div>
+    </header>
+
+    <main class="reader-wrap" id="reader-wrap">
+      <section class="toolbar" aria-label="Comic controls">
+        <div class="controls-group">
+          <button id="prev-btn" type="button">Previous</button>
+          <span id="page-indicator" aria-live="polite">Page 1 of 1</span>
+          <button id="next-btn" type="button">Next</button>
+        </div>
+
+        <div class="controls-group">
+          <label for="page-jump">Jump:</label>
+          <select id="page-jump"></select>
+        </div>
+
+        <div class="controls-group">
+          <span class="zoom-label" id="zoom-label">100%</span>
+          <button id="zoom-out" type="button" aria-label="Zoom out">-</button>
+          <button id="zoom-reset" type="button">Reset</button>
+          <button id="zoom-in" type="button" aria-label="Zoom in">+</button>
+        </div>
+      </section>
+
+      <section class="reader-stage" id="reader-stage" aria-label="Comic page viewer">
+        <img id="page-image" alt="Comic page" draggable="false" loading="eager" />
+      </section>
+
+      <p class="reader-help">Use arrow keys, swipe left/right, or the buttons above.</p>
+    </main>
+
+    <script type="module" src="/js/reader.js"></script>
+  </body>
+</html>
