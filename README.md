@@ -32,14 +32,16 @@ Static comic library and reader designed for Netlify hosting.
 
 ## Admin workflow (upload/delete comics)
 
-1. In Netlify site settings, enable **Identity**.
-2. Under Identity settings, enable **Git Gateway**.
-3. Invite your admin users under Identity.
-4. Open `/admin/` on your deployed site and log in.
+1. Create a GitHub OAuth App in your GitHub account:
+   - Homepage URL: your Netlify site URL (for example `https://incredible-sunshine-acf1bf.netlify.app`)
+   - Authorization callback URL: `https://api.netlify.com/auth/done`
+2. In Netlify, open this project and go to **Project configuration -> Access & security -> OAuth**.
+3. Install the **GitHub** provider and paste the OAuth App Client ID and Client Secret.
+4. Open `/admin/` on your deployed site and choose GitHub login.
 5. Open **Comics Data**.
 6. Add a comic entry, upload a cover image, and upload page images in order.
 7. Remove a comic entry to delete it from the site.
-8. Save/publish to commit the content changes.
+8. Save/publish to commit content changes into the GitHub repo.
 
 Note: deleting a comic entry removes it from the catalog immediately, but uploaded image files may still remain in `uploads/` unless manually deleted.
 

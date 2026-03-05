@@ -40,10 +40,12 @@ git commit -m "Update comics content"
 
 ## 5. Netlify admin setup
 
-- Enable Identity in Netlify.
-- Enable Git Gateway.
-- Invite admin users.
-- Verify `/admin/` login works.
+- Create a GitHub OAuth App:
+  - Homepage URL: your Netlify project URL
+  - Callback URL: `https://api.netlify.com/auth/done`
+- In Netlify Project configuration -> Access & security -> OAuth, install GitHub provider.
+- Paste Client ID and Client Secret from GitHub OAuth App.
+- Verify `/admin/` login works with GitHub.
 
 ## 6. Post-deploy smoke test
 
