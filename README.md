@@ -28,6 +28,7 @@ Static comic library and reader designed for Netlify hosting.
 - `scripts/optimize-images.sh`: generates optimized `*.opt.jpg` files.
 - `scripts/prune-original-images.sh`: safely deletes originals once optimized replacements exist.
 - `scripts/release-prep.sh`: one-command pre-deploy check (optimize + prune check + validation + git status).
+- `scripts/push-main.sh`: configures `origin` (optional URL arg) and pushes `main`.
 
 ## Admin workflow (upload/delete comics)
 
@@ -113,4 +114,16 @@ If this folder is not yet a Git repo:
 git init -b main
 git add .
 git commit -m "Initial comic site scaffold"
+```
+
+Push to a remote:
+
+```bash
+./scripts/push-main.sh git@github.com:your-org/your-repo.git
+```
+
+If `origin` already exists:
+
+```bash
+./scripts/push-main.sh
 ```

@@ -28,9 +28,7 @@ git commit -m "Update comics content"
 ## 3. Push to remote
 
 ```bash
-git remote -v
-# if needed: git remote add origin <your-repo-url>
-git push -u origin main
+./scripts/push-main.sh git@github.com:your-org/your-repo.git
 ```
 
 ## 4. Netlify site configuration
