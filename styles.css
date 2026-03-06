@@ -495,47 +495,47 @@ select:focus-visible {
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 640px) {
   .toolbar {
-    gap: 0.6rem 0.8rem;
-    padding: 0.55rem 0.65rem;
+    gap: 0.75rem 0.9rem;
+    padding: 0.65rem 0.75rem;
   }
 
   .toolbar-group {
-    gap: 0.6rem;
+    gap: 0.75rem;
   }
 
   .toolbar-nav {
-    gap: 0.6rem;
+    gap: 0.75rem;
   }
 
   .toolbar button {
-    min-height: 4.35rem;
-    min-width: 6.75rem;
-    padding: 1.08rem 1.5rem;
-    font-size: 1.58rem;
-    line-height: 1;
+    min-height: 4.8rem !important;
+    min-width: 7.5rem !important;
+    padding: 1.2rem 1.65rem !important;
+    font-size: 1.9rem !important;
+    line-height: 1 !important;
   }
 
   .toolbar label,
   #page-indicator,
   .zoom-label,
   #page-jump {
-    font-size: 1.5rem;
+    font-size: 1.8rem !important;
   }
 
   #page-jump {
-    min-width: 10.8rem;
-    height: 4.35rem;
-    padding: 0.7rem 0.9rem;
+    min-width: 11.8rem !important;
+    height: 4.8rem !important;
+    padding: 0.85rem 1rem !important;
   }
 
   #page-indicator {
-    font-size: 1.5rem;
+    font-size: 1.8rem !important;
   }
 
   .zoom-label {
-    min-width: 5.4rem;
+    min-width: 6rem;
   }
 }
 
