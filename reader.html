@@ -14,7 +14,49 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="/styles.css?v=20260306-reader-mobile-2" />
+    <style>
+      @media (max-width: 640px) {
+        .toolbar {
+          gap: 0.8rem 1rem !important;
+          padding: 0.8rem !important;
+        }
+
+        .toolbar-group,
+        .toolbar-nav {
+          gap: 0.8rem !important;
+        }
+
+        .toolbar button {
+          min-height: 4.8rem !important;
+          min-width: 7.2rem !important;
+          padding: 1rem 1.2rem !important;
+          font-size: 1.45rem !important;
+          line-height: 1 !important;
+        }
+
+        .toolbar label,
+        #page-indicator,
+        .zoom-label,
+        #page-jump {
+          font-size: 1.45rem !important;
+        }
+
+        #page-jump {
+          min-width: 10.5rem !important;
+          height: 4.8rem !important;
+          padding: 0.8rem 1rem !important;
+        }
+
+        #page-indicator {
+          font-size: 1.35rem !important;
+        }
+
+        .zoom-label {
+          min-width: 5rem !important;
+        }
+      }
+    </style>
   </head>
   <body class="reader-page">
     <header class="reader-header">
