@@ -20,7 +20,6 @@ const zoomOutBtn = document.getElementById("zoom-out");
 const zoomResetBtn = document.getElementById("zoom-reset");
 const readerWrap = document.getElementById("reader-wrap");
 
-const SWIPE_THRESHOLD = 55;
 const DEFAULT_ZOOM = 1;
 const MIN_ZOOM = 0.5;
 const MAX_ZOOM = 2.5;
@@ -29,11 +28,6 @@ const ZOOM_STEP = 0.25;
 let activeComic = null;
 let activePage = 1;
 let zoomLevel = DEFAULT_ZOOM;
-let touchStartX = null;
-let touchStartY = null;
-let pinchStartDistance = null;
-let pinchStartZoom = DEFAULT_ZOOM;
-let gestureStartZoom = DEFAULT_ZOOM;
 
 function parseReaderLocation() {
   const segments = window.location.pathname.split("/").filter(Boolean);
@@ -85,20 +79,6 @@ function clampZoom(level) {
 function setZoomLevel(level) {
   zoomLevel = clampZoom(level);
   applyZoom();
-}
-
-function getTouchDistance(touches) {
-  if (!touches || touches.length < 2) {
-    return 0;
-  }
-
-  const deltaX = touches[0].clientX - touches[1].clientX;
-  const deltaY = touches[0].clientY - touches[1].clientY;
-  return Math.hypot(deltaX, deltaY);
-}
-
-function isInsideReaderStage(target) {
-  return Boolean(target && readerStage.contains(target));
 }
 
 function applyZoom() {
@@ -182,132 +162,6 @@ function attachEvents() {
       goToNext();
     }
   });
-
-  readerStage.addEventListener(
-    "touchstart",
-    (event) => {
-      if (event.touches.length >= 2) {
-        event.preventDefault();
-        pinchStartDistance = getTouchDistance(event.touches);
-        pinchStartZoom = zoomLevel;
-        touchStartX = null;
-        touchStartY = null;
-        return;
-      }
-
-      const touch = event.changedTouches[0];
-      touchStartX = touch.clientX;
-      touchStartY = touch.clientY;
-    },
-    { passive: false }
-  );
-
-  readerStage.addEventListener(
-    "touchmove",
-    (event) => {
-      if (event.touches.length < 2 || pinchStartDistance === null) {
-        return;
-      }
-
-      const distance = getTouchDistance(event.touches);
-      if (!distance) {
-        return;
-      }
-
-      event.preventDefault();
-      setZoomLevel(pinchStartZoom * (distance / pinchStartDistance));
-    },
-    { passive: false }
-  );
-
-  readerStage.addEventListener(
-    "touchend",
-    (event) => {
-      if (pinchStartDistance !== null) {
-        if (event.touches.length < 2) {
-          pinchStartDistance = null;
-          pinchStartZoom = zoomLevel;
-        }
-        return;
-      }
-
-      if (touchStartX === null || touchStartY === null) {
-        return;
-      }
-
-      const touch = event.changedTouches[0];
-      const deltaX = touch.clientX - touchStartX;
-      const deltaY = touch.clientY - touchStartY;
-
-      touchStartX = null;
-      touchStartY = null;
-
-      if (Math.abs(deltaX) < SWIPE_THRESHOLD || Math.abs(deltaX) < Math.abs(deltaY)) {
-        return;
-      }
-
-      if (deltaX > 0) {
-        goToPrevious();
-      } else {
-        goToNext();
-      }
-    },
-    { passive: true }
-  );
-
-  document.addEventListener(
-    "gesturestart",
-    (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-      if (!isInsideReaderStage(event.target)) {
-        return;
-      }
-      gestureStartZoom = zoomLevel;
-    },
-    { passive: false, capture: true }
-  );
-
-  document.addEventListener(
-    "gesturechange",
-    (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-      if (!isInsideReaderStage(event.target)) {
-        return;
-      }
-      setZoomLevel(gestureStartZoom * event.scale);
-    },
-    { passive: false, capture: true }
-  );
-
-  document.addEventListener(
-    "gestureend",
-    (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-    },
-    { passive: false, capture: true }
-  );
-
-  window.addEventListener(
-    "wheel",
-    (event) => {
-      if (!event.ctrlKey) {
-        return;
-      }
-
-      event.preventDefault();
-      event.stopPropagation();
-      if (!isInsideReaderStage(event.target)) {
-        return;
-      }
-
-      const zoomFactor = Math.exp(-event.deltaY * 0.01);
-      setZoomLevel(zoomLevel * zoomFactor);
-    },
-    { passive: false, capture: true }
-  );
 }
 
 function renderPageOptions(totalPages) {

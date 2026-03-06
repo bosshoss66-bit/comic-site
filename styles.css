@@ -381,10 +381,33 @@ select:focus-visible {
     white-space: normal;
     overflow: visible;
     justify-content: center;
+    gap: 0.55rem;
+    padding: 0.7rem;
   }
 
   .reader-wrap {
     padding: 0 0.7rem 1rem;
+  }
+
+  .reader-header h1 {
+    font-size: clamp(1.8rem, 8vw, 2.6rem);
+  }
+
+  .toolbar button {
+    padding: 0.6rem 1rem;
+    font-size: 0.98rem;
+  }
+
+  .toolbar label,
+  #page-indicator,
+  .zoom-label,
+  #page-jump {
+    font-size: 0.98rem;
+  }
+
+  #page-jump {
+    min-width: 7rem;
+    height: 2.4rem;
   }
 
   .reader-stage {
