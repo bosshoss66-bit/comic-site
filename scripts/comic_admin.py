@@ -193,6 +193,23 @@ def delete_comic(*, slug: str, delete_files: bool = False) -> dict:
     return removed
 
 
+def rename_comic(*, slug: str, title: str) -> dict:
+    slug = slug.strip().lower()
+    title = title.strip()
+    if not title:
+        raise ValueError("Title is required.")
+
+    data = load_data()
+    comics = data.get("comics", [])
+    idx = find_comic_index(comics, slug)
+    if idx < 0:
+        raise ValueError(f"Comic slug not found: {slug}")
+
+    comics[idx]["title"] = title
+    save_data(data)
+    return comics[idx]
+
+
 def cmd_list(_: argparse.Namespace) -> int:
     comics = get_comics()
     if not comics:

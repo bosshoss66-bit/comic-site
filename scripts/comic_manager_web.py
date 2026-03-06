@@ -158,6 +158,12 @@ def comic_cards(comics: list[dict]) -> str:
             f"<p class='description'>{esc(description_text)}</p>"
             "</div>"
             "</div>"
+            "<form class='rename-form' method='post' action='/rename'>"
+            f"<input type='hidden' name='slug' value='{esc(slug)}' />"
+            "<label class='rename-label'>Series Title</label>"
+            f"<input name='title' type='text' value='{esc(title)}' required />"
+            "<button type='submit'>Save Title</button>"
+            "</form>"
             f"<p class='cover-path'><code>{esc(cover or 'Cover will use first page')}</code></p>"
             "</article>"
         )
@@ -557,6 +563,28 @@ def render_page(message: str = "", is_error: bool = False) -> bytes:
       color: #333b46;
       font-size: 0.92rem;
     }}
+    .rename-form {{
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: end;
+      margin-top: 9px;
+    }}
+    .rename-label {{
+      grid-column: 1 / -1;
+      margin: 0;
+      font-size: 0.78rem;
+      color: var(--ink-soft);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }}
+    .rename-form input[type="text"] {{
+      margin: 0;
+    }}
+    .rename-form button {{
+      padding: 8px 12px;
+      white-space: nowrap;
+    }}
     .cover-path {{
       margin: 7px 0 0;
       color: #667180;
@@ -751,6 +779,9 @@ class ManagerHandler(BaseHTTPRequestHandler):
             if self.path == "/delete":
                 self._handle_delete()
                 return
+            if self.path == "/rename":
+                self._handle_rename()
+                return
             if self.path == "/publish":
                 self._handle_publish()
                 return
@@ -841,6 +872,24 @@ class ManagerHandler(BaseHTTPRequestHandler):
         try:
             removed = comic_admin.delete_comic(slug=slug, delete_files=delete_files)
             self._redirect(f"Deleted comic '{removed.get('title', slug)}'.", error=False)
+        except Exception as error:  # pragma: no cover
+            self._redirect(str(error), error=True)
+
+    def _handle_rename(self) -> None:
+        content_length = int(self.headers.get("Content-Length", "0") or "0")
+        raw = self.rfile.read(content_length)
+        params = urllib.parse.parse_qs(raw.decode("utf-8", errors="replace"))
+
+        slug = (params.get("slug", [""])[0] or "").strip()
+        title = (params.get("title", [""])[0] or "").strip()
+
+        if not slug:
+            self._redirect("Select a comic to rename.", error=True)
+            return
+
+        try:
+            updated = comic_admin.rename_comic(slug=slug, title=title)
+            self._redirect(f"Renamed comic to '{updated.get('title', slug)}'.", error=False)
         except Exception as error:  # pragma: no cover
             self._redirect(str(error), error=True)
 
