@@ -97,6 +97,10 @@ function getTouchDistance(touches) {
   return Math.hypot(deltaX, deltaY);
 }
 
+function isInsideReaderStage(target) {
+  return Boolean(target && readerStage.contains(target));
+}
+
 function applyZoom() {
   pageImage.style.width = `${Math.round(zoomLevel * 100)}%`;
   zoomLabel.textContent = `${Math.round(zoomLevel * 100)}%`;
@@ -183,6 +187,7 @@ function attachEvents() {
     "touchstart",
     (event) => {
       if (event.touches.length >= 2) {
+        event.preventDefault();
         pinchStartDistance = getTouchDistance(event.touches);
         pinchStartZoom = zoomLevel;
         touchStartX = null;
@@ -194,7 +199,7 @@ function attachEvents() {
       touchStartX = touch.clientX;
       touchStartY = touch.clientY;
     },
-    { passive: true }
+    { passive: false }
   );
 
   readerStage.addEventListener(
@@ -250,17 +255,31 @@ function attachEvents() {
     { passive: true }
   );
 
-  readerStage.addEventListener("gesturestart", (event) => {
-    event.preventDefault();
-    gestureStartZoom = zoomLevel;
-  });
+  document.addEventListener(
+    "gesturestart",
+    (event) => {
+      event.preventDefault();
+      if (!isInsideReaderStage(event.target)) {
+        return;
+      }
+      gestureStartZoom = zoomLevel;
+    },
+    { passive: false, capture: true }
+  );
 
-  readerStage.addEventListener("gesturechange", (event) => {
-    event.preventDefault();
-    setZoomLevel(gestureStartZoom * event.scale);
-  });
+  document.addEventListener(
+    "gesturechange",
+    (event) => {
+      event.preventDefault();
+      if (!isInsideReaderStage(event.target)) {
+        return;
+      }
+      setZoomLevel(gestureStartZoom * event.scale);
+    },
+    { passive: false, capture: true }
+  );
 
-  readerStage.addEventListener(
+  window.addEventListener(
     "wheel",
     (event) => {
       if (!event.ctrlKey) {
@@ -268,10 +287,14 @@ function attachEvents() {
       }
 
       event.preventDefault();
+      if (!isInsideReaderStage(event.target)) {
+        return;
+      }
+
       const zoomFactor = Math.exp(-event.deltaY * 0.01);
       setZoomLevel(zoomLevel * zoomFactor);
     },
-    { passive: false }
+    { passive: false, capture: true }
   );
 }
 
