@@ -8,7 +8,6 @@ import {
 } from "/js/data.js";
 
 const titleEl = document.getElementById("comic-title");
-const eyebrowEl = document.getElementById("reader-eyebrow");
 const prevBtn = document.getElementById("prev-btn");
 const nextBtn = document.getElementById("next-btn");
 const pageIndicator = document.getElementById("page-indicator");
@@ -22,13 +21,14 @@ const zoomResetBtn = document.getElementById("zoom-reset");
 const readerWrap = document.getElementById("reader-wrap");
 
 const SWIPE_THRESHOLD = 55;
-const MIN_ZOOM = 1;
+const DEFAULT_ZOOM = 1;
+const MIN_ZOOM = 0.5;
 const MAX_ZOOM = 2.5;
 const ZOOM_STEP = 0.25;
 
 let activeComic = null;
 let activePage = 1;
-let zoomLevel = 1;
+let zoomLevel = DEFAULT_ZOOM;
 let touchStartX = null;
 let touchStartY = null;
 
@@ -141,7 +141,7 @@ function attachEvents() {
   });
 
   zoomResetBtn.addEventListener("click", () => {
-    zoomLevel = MIN_ZOOM;
+    zoomLevel = DEFAULT_ZOOM;
     applyZoom();
     readerStage.scrollTo({ left: 0, top: 0, behavior: "smooth" });
   });
@@ -240,7 +240,6 @@ async function main() {
 
     activeComic = comic;
     titleEl.textContent = comic.title;
-    eyebrowEl.textContent = site?.title || "Oracle Comics";
     document.title = `${comic.title} | Comic Reader`;
 
     renderPageOptions(comic.pages.length);

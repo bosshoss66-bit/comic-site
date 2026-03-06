@@ -1,6 +1,6 @@
 @font-face {
-  font-family: "MochibopBold";
-  src: url("/assets/fonts/MochibopBold-Demo.ttf") format("truetype");
+  font-family: "Mochibop";
+  src: url("/assets/fonts/Mochibop-Demo.ttf") format("truetype");
   font-display: swap;
 }
 
@@ -48,7 +48,8 @@ h3 {
 .comic-meta h3,
 .section-heading-row h2,
 .continue-panel h2 {
-  font-family: "MochibopBold", "Bangers", Impact, sans-serif;
+  font-family: "Mochibop", "Bangers", Impact, sans-serif;
+  font-weight: 400;
   letter-spacing: 0.03em;
 }
 
@@ -241,20 +242,21 @@ select:focus-visible {
 .reader-header {
   width: min(1420px, 100%);
   margin: 0 auto;
-  padding: 0.8rem 0.95rem 0.45rem;
-  text-align: left;
+  padding: 0.35rem 0.95rem 0.3rem;
+  text-align: center;
 }
 
 .back-link {
   display: inline-block;
-  margin-bottom: 0.3rem;
+  margin: 0 auto;
   font-weight: 800;
+  text-align: center;
 }
 
 .reader-wrap {
   width: min(1420px, 100%);
   margin: 0 auto;
-  padding: 0 0.9rem 0.9rem;
+  padding: 0 0.9rem 0.5rem;
   display: flex;
   flex-direction: column;
   flex: 1;
@@ -265,7 +267,7 @@ select:focus-visible {
   position: sticky;
   top: 0.25rem;
   z-index: 20;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.35rem;
   border: 1px solid var(--line);
   border-radius: 12px;
   background: rgba(255, 251, 244, 0.94);
@@ -325,7 +327,7 @@ select:focus-visible {
   border: 1px solid var(--line);
   border-radius: 14px;
   background: #ffffff;
-  min-height: 320px;
+  min-height: 360px;
   overflow: auto;
   display: flex;
   align-items: flex-start;
@@ -348,6 +350,18 @@ select:focus-visible {
   margin-top: 0.45rem;
   font-size: 0.86rem;
   color: var(--ink-soft);
+}
+
+.reader-footer {
+  width: min(1420px, 100%);
+  margin: 0 auto;
+  padding: 0 0.9rem 0.9rem;
+  text-align: center;
+}
+
+.reader-footer .back-link {
+  display: inline-block;
+  margin: 0;
 }
 
 .error-box {
@@ -374,6 +388,10 @@ select:focus-visible {
 
   .reader-stage {
     min-height: 300px;
+  }
+
+  .reader-footer {
+    padding: 0 0.7rem 1rem;
   }
 
   .section-heading-row {
