@@ -297,6 +297,7 @@ def render_page(message: str = "", is_error: bool = False) -> bytes:
     }}
     .page-header h1 {{
       font-family: "Mochibop", "Trebuchet MS", sans-serif;
+      font-weight: 400;
       font-size: clamp(2rem, 3vw + 1rem, 3.35rem);
       color: #20242d;
       margin-bottom: 6px;
@@ -522,6 +523,7 @@ def render_page(message: str = "", is_error: bool = False) -> bytes:
     .comic-title {{
       margin: 0;
       font-family: "Mochibop", "Trebuchet MS", sans-serif;
+      font-weight: 400;
       font-size: 1.34rem;
       line-height: 1;
       color: #222531;
