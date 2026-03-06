@@ -83,6 +83,7 @@ function setZoomLevel(level) {
 
 function applyZoom() {
   pageImage.style.width = `${Math.round(zoomLevel * 100)}%`;
+  pageImage.style.maxWidth = zoomLevel > DEFAULT_ZOOM ? "none" : "1200px";
   zoomLabel.textContent = `${Math.round(zoomLevel * 100)}%`;
   zoomOutBtn.disabled = zoomLevel <= MIN_ZOOM;
   zoomInBtn.disabled = zoomLevel >= MAX_ZOOM;
