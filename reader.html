@@ -23,15 +23,21 @@
 
     <main class="reader-wrap" id="reader-wrap">
       <section class="toolbar" aria-label="Comic controls">
-        <button id="prev-btn" type="button">Previous</button>
-        <span id="page-indicator" aria-live="polite">Page 1 of 1</span>
-        <button id="next-btn" type="button">Next</button>
-        <label for="page-jump">Jump:</label>
-        <select id="page-jump"></select>
-        <span class="zoom-label" id="zoom-label">100%</span>
-        <button id="zoom-out" type="button" aria-label="Zoom out">-</button>
-        <button id="zoom-reset" type="button">Reset</button>
-        <button id="zoom-in" type="button" aria-label="Zoom in">+</button>
+        <div class="toolbar-group toolbar-nav">
+          <button id="prev-btn" type="button">Previous</button>
+          <span id="page-indicator" aria-live="polite">Page 1 of 1</span>
+          <button id="next-btn" type="button">Next</button>
+        </div>
+        <div class="toolbar-group toolbar-jump">
+          <label for="page-jump">Jump:</label>
+          <select id="page-jump"></select>
+        </div>
+        <div class="toolbar-group toolbar-zoom">
+          <span class="zoom-label" id="zoom-label">100%</span>
+          <button id="zoom-out" type="button" aria-label="Zoom out">-</button>
+          <button id="zoom-reset" type="button">Reset</button>
+          <button id="zoom-in" type="button" aria-label="Zoom in">+</button>
+        </div>
       </section>
 
       <section class="reader-stage" id="reader-stage" aria-label="Comic page viewer">
