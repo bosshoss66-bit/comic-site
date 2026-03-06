@@ -259,6 +259,7 @@ function attachEvents() {
     "gesturestart",
     (event) => {
       event.preventDefault();
+      event.stopPropagation();
       if (!isInsideReaderStage(event.target)) {
         return;
       }
@@ -271,10 +272,20 @@ function attachEvents() {
     "gesturechange",
     (event) => {
       event.preventDefault();
+      event.stopPropagation();
       if (!isInsideReaderStage(event.target)) {
         return;
       }
       setZoomLevel(gestureStartZoom * event.scale);
+    },
+    { passive: false, capture: true }
+  );
+
+  document.addEventListener(
+    "gestureend",
+    (event) => {
+      event.preventDefault();
+      event.stopPropagation();
     },
     { passive: false, capture: true }
   );
@@ -287,6 +298,7 @@ function attachEvents() {
       }
 
       event.preventDefault();
+      event.stopPropagation();
       if (!isInsideReaderStage(event.target)) {
         return;
       }
