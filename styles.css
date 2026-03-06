@@ -378,6 +378,8 @@ select:focus-visible {
 .reader-footer .back-link {
   display: inline-block;
   margin: 0;
+  font-size: 1rem;
+  line-height: 1.1;
 }
 
 .error-box {
