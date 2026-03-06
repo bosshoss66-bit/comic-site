@@ -12,6 +12,7 @@ import re
 import shutil
 import subprocess
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -29,7 +30,13 @@ def load_data() -> dict:
         return json.load(fh)
 
 
+def new_content_version() -> str:
+    return datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
+
+
 def save_data(data: dict) -> None:
+    site = data.setdefault("site", {})
+    site["contentVersion"] = new_content_version()
     with DATA_PATH.open("w", encoding="utf-8") as fh:
         json.dump(data, fh, indent=2)
         fh.write("\n")
@@ -157,6 +164,7 @@ def add_comic(
         "slug": slug,
         "title": title,
         "description": description,
+        "version": new_content_version(),
         "cover": f"/uploads/{slug}/cover.opt.jpg",
         "pages": page_paths,
     }

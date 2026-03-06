@@ -133,12 +133,14 @@ def comic_cards(comics: list[dict]) -> str:
         pages = len(comic.get("pages", []))
         cover = str(comic.get("cover", "") or "")
         description = str(comic.get("description", "") or "")
+        version = str(comic.get("version", "") or "")
         description_text = description if description else "No description provided."
         reader_url = f"{LIVE_SITE_URL}/comic/{urllib.parse.quote(slug)}/1"
+        cover_url = f"{cover}?v={urllib.parse.quote(version)}" if cover and version else cover
 
         cover_html = (
-            f"<img class='cover-thumb' src='{esc(cover)}' alt='Cover for {esc(title)}' loading='lazy' />"
-            if cover
+            f"<img class='cover-thumb' src='{esc(cover_url)}' alt='Cover for {esc(title)}' loading='lazy' />"
+            if cover_url
             else "<div class='cover-thumb placeholder'>No cover</div>"
         )
 

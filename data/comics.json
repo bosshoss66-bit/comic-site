@@ -1,13 +1,15 @@
 {
   "site": {
     "title": "Oracle Comics Library",
-    "description": "A4 comic strips, published as online page readers."
+    "description": "A4 comic strips, published as online page readers.",
+    "contentVersion": "20260306054000"
   },
   "comics": [
     {
       "slug": "celery-man",
       "title": "Celery Man Starring Germaine",
       "description": "",
+      "version": "20260306054000",
       "cover": "/uploads/celery-man/cover.opt.jpg",
       "pages": [
         "/uploads/celery-man/001.opt.jpg",
@@ -23,6 +25,7 @@
       "slug": "marshmallow-man",
       "title": "Marshmallow Man Starring Germaine",
       "description": "",
+      "version": "20260306054000",
       "cover": "/uploads/marshmallow-man/cover.opt.jpg",
       "pages": [
         "/uploads/marshmallow-man/001.opt.jpg",

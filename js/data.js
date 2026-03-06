@@ -1,6 +1,26 @@
 const DATA_URL = "/data/comics.json";
 const PROGRESS_KEY = "comic-progress-v1";
 
+function splitUrl(path) {
+  const [base, ...queryParts] = String(path).split("?");
+  return {
+    base,
+    query: queryParts.length > 0 ? `?${queryParts.join("?")}` : "",
+  };
+}
+
+export function withCacheBust(path, version) {
+  if (typeof path !== "string" || !path) {
+    return "";
+  }
+  if (!version) {
+    return path;
+  }
+
+  const separator = path.includes("?") ? "&" : "?";
+  return `${path}${separator}v=${encodeURIComponent(version)}`;
+}
+
 export async function loadComicData() {
   const response = await fetch(DATA_URL, { cache: "no-store" });
   if (!response.ok) {
@@ -8,9 +28,26 @@ export async function loadComicData() {
   }
 
   const payload = await response.json();
+  const site = payload.site ?? {};
+  const globalVersion = site.contentVersion || "";
+  const comics = Array.isArray(payload.comics)
+    ? payload.comics.map((comic) => {
+        const version = comic?.version || globalVersion;
+        const pages = Array.isArray(comic?.pages)
+          ? comic.pages.map((page) => withCacheBust(page, version))
+          : [];
+        return {
+          ...comic,
+          version,
+          cover: withCacheBust(comic?.cover || "", version),
+          pages,
+        };
+      })
+    : [];
+
   return {
-    site: payload.site ?? {},
-    comics: Array.isArray(payload.comics) ? payload.comics : [],
+    site,
+    comics,
   };
 }
 
@@ -64,11 +101,19 @@ export function getOptimizedCandidate(path) {
   if (typeof path !== "string") {
     return "";
   }
-  return path.replace(/\.(jpe?g|png)$/i, ".opt.jpg");
+  const { base, query } = splitUrl(path);
+  if (/\.opt\.jpg$/i.test(base)) {
+    return path;
+  }
+  return base.replace(/\.(jpe?g|png)$/i, ".opt.jpg") + query;
 }
 
 export function shouldTryOptimized(path) {
-  return /\.(jpe?g|png)$/i.test(path);
+  if (typeof path !== "string") {
+    return false;
+  }
+  const { base } = splitUrl(path);
+  return /\.(jpe?g|png)$/i.test(base) && !/\.opt\.jpg$/i.test(base);
 }
 
 export function applyImageFallback(imageElement, originalSource) {
