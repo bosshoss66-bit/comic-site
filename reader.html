@@ -14,24 +14,57 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="/styles.css?v=20260306-reader-mobile-2" />
+    <link rel="stylesheet" href="/styles.css?v=20260306-reader-mobile-3" />
     <style>
+      html {
+        -webkit-text-size-adjust: 100%;
+      }
+
       @media (max-width: 640px) {
         .toolbar {
-          gap: 0.8rem 1rem !important;
-          padding: 0.8rem !important;
+          grid-template-columns: 40% 60% !important;
+          grid-template-areas:
+            "jump nav"
+            "zoom zoom" !important;
+          gap: 0.45rem 0.55rem !important;
+          padding: 0.45rem 0.55rem !important;
+          overflow: hidden !important;
         }
 
-        .toolbar-group,
+        .toolbar-group {
+          min-width: 0 !important;
+          gap: 0.35rem !important;
+        }
+
+        .toolbar-jump {
+          justify-content: flex-start !important;
+          justify-self: stretch !important;
+          width: 100% !important;
+        }
+
         .toolbar-nav {
-          gap: 0.8rem !important;
+          display: grid !important;
+          grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
+          align-items: center !important;
+          justify-content: stretch !important;
+          gap: 0.35rem !important;
+          width: 100% !important;
+        }
+
+        .toolbar-zoom {
+          justify-self: stretch !important;
+          justify-content: center !important;
+          gap: 0.4rem !important;
+          width: 100% !important;
         }
 
         .toolbar button {
-          min-height: 4.8rem !important;
-          min-width: 7.2rem !important;
-          padding: 1rem 1.2rem !important;
-          font-size: 1.45rem !important;
+          min-width: 0 !important;
+          width: auto !important;
+          max-width: none !important;
+          min-height: 3.3rem !important;
+          padding: 0.72rem 0.9rem !important;
+          font-size: 1.2rem !important;
           line-height: 1 !important;
         }
 
@@ -39,21 +72,35 @@
         #page-indicator,
         .zoom-label,
         #page-jump {
-          font-size: 1.45rem !important;
+          font-size: 1.18rem !important;
+        }
+
+        #prev-btn,
+        #next-btn,
+        #zoom-in,
+        #zoom-reset,
+        #zoom-out {
+          flex: 0 0 auto !important;
         }
 
         #page-jump {
-          min-width: 10.5rem !important;
-          height: 4.8rem !important;
-          padding: 0.8rem 1rem !important;
+          width: 100% !important;
+          min-width: 0 !important;
+          max-width: 100% !important;
+          height: 3.3rem !important;
+          padding: 0.55rem 0.7rem !important;
         }
 
         #page-indicator {
-          font-size: 1.35rem !important;
+          min-width: 0 !important;
+          white-space: nowrap !important;
+          text-align: center !important;
+          font-size: 1.08rem !important;
         }
 
         .zoom-label {
-          min-width: 5rem !important;
+          min-width: 3.6rem !important;
+          text-align: center !important;
         }
       }
     </style>
