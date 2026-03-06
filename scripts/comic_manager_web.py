@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import cgi
 import html
+import mimetypes
 import socket
 import socketserver
 import subprocess
@@ -121,27 +122,44 @@ def get_deployment_status() -> dict[str, Any]:
     }
 
 
-def comic_rows(comics: list[dict]) -> str:
+def comic_cards(comics: list[dict]) -> str:
     if not comics:
-        return "<tr><td colspan='5'>No comics yet.</td></tr>"
+        return "<p class='empty-state'>No comics yet. Add a comic from the form on the left.</p>"
 
-    rows = []
+    cards: list[str] = []
     for comic in comics:
-        slug = comic.get("slug", "")
-        title = comic.get("title", "")
+        slug = str(comic.get("slug", "") or "")
+        title = str(comic.get("title", "") or slug)
         pages = len(comic.get("pages", []))
-        cover = comic.get("cover", "")
-        desc = comic.get("description", "")
-        rows.append(
-            "<tr>"
-            f"<td>{esc(slug)}</td>"
-            f"<td>{esc(title)}</td>"
-            f"<td>{pages}</td>"
-            f"<td>{esc(cover)}</td>"
-            f"<td>{esc(desc)}</td>"
-            "</tr>"
+        cover = str(comic.get("cover", "") or "")
+        description = str(comic.get("description", "") or "")
+        description_text = description if description else "No description provided."
+        reader_url = f"{LIVE_SITE_URL}/comic/{urllib.parse.quote(slug)}/1"
+
+        cover_html = (
+            f"<img class='cover-thumb' src='{esc(cover)}' alt='Cover for {esc(title)}' loading='lazy' />"
+            if cover
+            else "<div class='cover-thumb placeholder'>No cover</div>"
         )
-    return "\n".join(rows)
+
+        cards.append(
+            "<article class='comic-card'>"
+            "<div class='comic-card-top'>"
+            f"{cover_html}"
+            "<div class='comic-card-main'>"
+            f"<h3 class='comic-title'>{esc(title)}</h3>"
+            f"<p class='slug-line'>{esc(slug)}</p>"
+            "<div class='comic-meta'>"
+            f"<span>{pages} page(s)</span>"
+            f"<a href='{esc(reader_url)}' target='_blank' rel='noopener'>Open reader</a>"
+            "</div>"
+            f"<p class='description'>{esc(description_text)}</p>"
+            "</div>"
+            "</div>"
+            f"<p class='cover-path'><code>{esc(cover or 'Cover will use first page')}</code></p>"
+            "</article>"
+        )
+    return "\n".join(cards)
 
 
 def comic_options(comics: list[dict]) -> str:
@@ -182,18 +200,33 @@ def render_deployment_panel(status: dict[str, Any]) -> str:
             f"<a href='{esc(status['netlify_deploys_url'])}' target='_blank' rel='noopener'>Netlify Deploys</a>"
         )
 
-    links_html = " | ".join(links) if links else "No remote/deploy links available."
+    links_html = " ".join(links) if links else "<span class='muted'>No remote/deploy links available.</span>"
 
     return (
-        "<section class='card'>"
+        "<section class='card deploy-card'>"
+        "<div class='section-heading'>"
         "<h2>Deployment Status</h2>"
-        "<div class='status-list'>"
-        f"<p><strong>Branch:</strong> {esc(status['branch'])}</p>"
-        f"<p><strong>Latest Local Commit:</strong> {head_line}</p>"
-        f"<p><strong>Repo State:</strong> {esc(clean_text)}</p>"
-        f"<p><strong>Sync:</strong> {esc(status['sync_state'])}</p>"
+        "<p class='hint'>Quick visibility into local git state and Netlify links.</p>"
         "</div>"
-        f"<p class='hint'>{links_html}</p>"
+        "<div class='stat-grid'>"
+        "<div class='stat-item'>"
+        "<span class='label'>Branch</span>"
+        f"<strong>{esc(status['branch'])}</strong>"
+        "</div>"
+        "<div class='stat-item'>"
+        "<span class='label'>Latest commit</span>"
+        f"<strong>{head_line}</strong>"
+        "</div>"
+        "<div class='stat-item'>"
+        "<span class='label'>Repo state</span>"
+        f"<strong>{esc(clean_text)}</strong>"
+        "</div>"
+        "<div class='stat-item'>"
+        "<span class='label'>Sync</span>"
+        f"<strong>{esc(status['sync_state'])}</strong>"
+        "</div>"
+        "</div>"
+        f"<div class='link-row'>{links_html}</div>"
         "</section>"
     )
 
@@ -215,98 +248,393 @@ def render_page(message: str = "", is_error: bool = False) -> bytes:
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Comic Manager</title>
   <style>
+    @font-face {{
+      font-family: "Mochibop";
+      src: url("/assets/fonts/Mochibop-Demo.ttf") format("truetype");
+      font-display: swap;
+    }}
     :root {{
-      --bg: #f6f4ef;
+      --bg: #f4f4f8;
+      --bg-accent: #fef9ee;
       --card: #ffffff;
-      --line: #d9d5cc;
-      --ink: #1f1f1f;
-      --ink-soft: #555;
-      --brand: #e15723;
-      --ok: #14532d;
-      --ok-bg: #dcfce7;
+      --line: #ddd9cf;
+      --ink: #1f2024;
+      --ink-soft: #5d6572;
+      --brand: #ea5b2b;
+      --brand-strong: #be3f14;
+      --brand-soft: #fff1e8;
+      --ok: #0f5132;
+      --ok-bg: #d1f5dd;
       --err: #7f1d1d;
       --err-bg: #fee2e2;
+      --shadow: 0 14px 40px rgba(31, 32, 36, 0.11);
+    }}
+    * {{
+      box-sizing: border-box;
     }}
     body {{
       margin: 0;
-      padding: 24px;
       background: var(--bg);
       color: var(--ink);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-family: "Avenir Next", "Segoe UI", "Helvetica Neue", sans-serif;
+      line-height: 1.45;
     }}
-    h1, h2 {{ margin: 0 0 12px; }}
-    .layout {{ display: grid; gap: 16px; grid-template-columns: 1fr 1fr; }}
+    .page {{
+      width: min(1500px, 100%);
+      margin: 0 auto;
+      padding: 22px 20px 28px;
+    }}
+    h1, h2, h3 {{ margin: 0; }}
+    .page-header {{
+      margin-bottom: 14px;
+      padding: 18px 20px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background:
+        radial-gradient(circle at top right, rgba(234, 91, 43, 0.14), transparent 48%),
+        linear-gradient(145deg, var(--bg-accent), #ffffff 70%);
+      box-shadow: var(--shadow);
+    }}
+    .page-header h1 {{
+      font-family: "Mochibop", "Trebuchet MS", sans-serif;
+      font-size: clamp(2rem, 3vw + 1rem, 3.35rem);
+      color: #20242d;
+      margin-bottom: 6px;
+      letter-spacing: 0.02em;
+    }}
+    .page-header p {{
+      margin: 0;
+      color: var(--ink-soft);
+      font-size: 0.98rem;
+    }}
+    .page-header a {{
+      color: var(--brand-strong);
+      font-weight: 700;
+      text-decoration-thickness: 2px;
+    }}
+    .layout {{
+      display: grid;
+      grid-template-columns: minmax(320px, 420px) minmax(0, 1fr);
+      gap: 16px;
+      align-items: start;
+    }}
+    .stack {{
+      display: grid;
+      gap: 16px;
+    }}
     .card {{
       background: var(--card);
       border: 1px solid var(--line);
-      border-radius: 12px;
-      padding: 14px;
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: var(--shadow);
     }}
-    .full {{ grid-column: 1 / -1; }}
-    label {{ display: block; margin: 10px 0 4px; font-weight: 600; }}
+    .section-heading {{
+      margin-bottom: 10px;
+    }}
+    .section-heading h2 {{
+      font-size: 1.2rem;
+      margin-bottom: 3px;
+    }}
+    .label {{
+      color: var(--ink-soft);
+      font-size: 0.78rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      font-weight: 800;
+      display: block;
+      margin-bottom: 4px;
+    }}
+    .field {{
+      margin: 12px 0 0;
+    }}
+    label {{
+      display: block;
+      margin: 0 0 5px;
+      font-weight: 700;
+      font-size: 0.94rem;
+    }}
     input[type="text"], textarea, select {{
       width: 100%;
       border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 8px;
+      border-radius: 10px;
+      padding: 9px 10px;
       font: inherit;
+      background: #fff;
+      color: var(--ink);
     }}
-    textarea {{ min-height: 66px; resize: vertical; }}
-    input[type="file"] {{ width: 100%; margin-top: 4px; }}
-    .row {{ display: flex; gap: 10px; align-items: center; margin-top: 10px; }}
+    input[type="text"]:focus, textarea:focus, select:focus {{
+      outline: 3px solid rgba(234, 91, 43, 0.22);
+      border-color: #d7b6a7;
+      outline-offset: 1px;
+    }}
+    textarea {{ min-height: 78px; resize: vertical; }}
+    .upload-area {{
+      margin-top: 12px;
+      border: 1px dashed #cbbda9;
+      border-radius: 12px;
+      background: #fffaf4;
+      padding: 11px 12px;
+    }}
+    .upload-area .field:first-child {{
+      margin-top: 0;
+    }}
+    input[type="file"] {{
+      width: 100%;
+      margin-top: 2px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 7px;
+      background: #fff;
+    }}
+    .row {{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-top: 12px;
+    }}
+    .checkbox {{
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0;
+      font-weight: 600;
+      color: #384250;
+    }}
+    .checkbox input {{
+      accent-color: var(--brand);
+      width: 16px;
+      height: 16px;
+      margin: 0;
+    }}
     button {{
-      border: 1px solid #c84a1e;
+      border: 1px solid var(--brand-strong);
       background: var(--brand);
       color: white;
       font: inherit;
-      border-radius: 8px;
+      font-weight: 700;
+      border-radius: 11px;
       padding: 9px 14px;
       cursor: pointer;
+      transition: transform 120ms ease, box-shadow 120ms ease, filter 120ms ease;
     }}
-    button.secondary {{ background: #fff; color: #1f1f1f; border-color: var(--line); }}
-    .status {{ margin-bottom: 14px; border-radius: 8px; padding: 10px 12px; font-weight: 600; }}
+    button:hover {{
+      transform: translateY(-1px);
+      box-shadow: 0 10px 20px rgba(190, 63, 20, 0.2);
+      filter: brightness(1.02);
+    }}
+    button:focus-visible {{
+      outline: 3px solid rgba(234, 91, 43, 0.24);
+      outline-offset: 2px;
+    }}
+    button.secondary {{
+      background: #fff;
+      color: #1f2430;
+      border-color: var(--line);
+    }}
+    .status {{
+      margin: 0 0 14px;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-weight: 700;
+      border: 1px solid transparent;
+    }}
     .status.ok {{ background: var(--ok-bg); color: var(--ok); }}
     .status.error {{ background: var(--err-bg); color: var(--err); }}
-    .status.muted {{ background: #eef2f7; color: #334155; }}
-    table {{ width: 100%; border-collapse: collapse; font-size: 14px; }}
-    th, td {{ border-top: 1px solid var(--line); padding: 7px 8px; text-align: left; vertical-align: top; }}
-    th {{ color: var(--ink-soft); font-size: 12px; text-transform: uppercase; letter-spacing: .05em; }}
-    .hint {{ color: var(--ink-soft); font-size: 13px; margin-top: 8px; }}
-    .status-list p {{ margin: 0 0 6px; }}
-    @media (max-width: 980px) {{ .layout {{ grid-template-columns: 1fr; }} }}
+    .status.muted {{
+      background: #edf3fb;
+      color: #334155;
+      border-color: #cfdceb;
+    }}
+    .hint {{
+      color: var(--ink-soft);
+      font-size: 0.87rem;
+      margin: 7px 0 0;
+    }}
+    .deploy-card .stat-grid {{
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 10px;
+    }}
+    .deploy-card .stat-item {{
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fffcf8;
+      padding: 8px 10px;
+      min-width: 0;
+    }}
+    .deploy-card strong {{
+      font-size: 0.92rem;
+      display: block;
+      word-break: break-word;
+    }}
+    .link-row {{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 11px;
+    }}
+    .link-row a {{
+      color: #21437a;
+      font-weight: 700;
+      text-decoration-thickness: 2px;
+    }}
+    .muted {{
+      color: var(--ink-soft);
+      font-size: 0.9rem;
+    }}
+    .comic-list {{
+      display: grid;
+      gap: 10px;
+    }}
+    .comic-card {{
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 11px;
+      background: #fffdfa;
+    }}
+    .comic-card-top {{
+      display: grid;
+      grid-template-columns: 76px minmax(0, 1fr);
+      gap: 10px;
+    }}
+    .cover-thumb {{
+      width: 76px;
+      height: 106px;
+      border-radius: 9px;
+      object-fit: cover;
+      border: 1px solid var(--line);
+      background: #f0ece3;
+    }}
+    .cover-thumb.placeholder {{
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: #6b7280;
+      font-size: 0.74rem;
+      padding: 6px;
+    }}
+    .comic-card-main {{
+      min-width: 0;
+    }}
+    .comic-title {{
+      margin: 0;
+      font-family: "Mochibop", "Trebuchet MS", sans-serif;
+      font-size: 1.34rem;
+      line-height: 1;
+      color: #222531;
+    }}
+    .slug-line {{
+      margin: 4px 0 0;
+      font-size: 0.88rem;
+      color: #687485;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      word-break: break-word;
+    }}
+    .comic-meta {{
+      margin-top: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.86rem;
+      color: #505866;
+      font-weight: 700;
+    }}
+    .comic-meta a {{
+      color: #1e4f8f;
+      text-decoration-thickness: 2px;
+      white-space: nowrap;
+    }}
+    .description {{
+      margin: 6px 0 0;
+      color: #333b46;
+      font-size: 0.92rem;
+    }}
+    .cover-path {{
+      margin: 7px 0 0;
+      color: #667180;
+      font-size: 0.78rem;
+      overflow-wrap: anywhere;
+    }}
+    .empty-state {{
+      margin: 4px 0 0;
+      border: 1px dashed var(--line);
+      border-radius: 11px;
+      padding: 13px;
+      color: var(--ink-soft);
+      background: #fffefb;
+    }}
+    @media (max-width: 1100px) {{
+      .layout {{
+        grid-template-columns: 1fr;
+      }}
+      .page {{
+        padding: 16px;
+      }}
+    }}
+    @media (max-width: 640px) {{
+      .comic-card-top {{
+        grid-template-columns: 1fr;
+      }}
+      .cover-thumb {{
+        width: 100%;
+        height: auto;
+        aspect-ratio: 1 / 1.4;
+      }}
+      .deploy-card .stat-grid {{
+        grid-template-columns: 1fr;
+      }}
+    }}
   </style>
 </head>
 <body>
-  <h1>Comic Manager</h1>
-  <p class="hint">
-    Local admin panel for adding/removing comics in this repo.
-    Live site: <a href="{esc(LIVE_SITE_URL)}" target="_blank" rel="noopener">{esc(LIVE_SITE_URL)}</a>
-  </p>
+  <div class="page">
+  <header class="page-header">
+    <h1>Comic Manager</h1>
+    <p>
+      Local admin panel for adding, replacing, deleting, and publishing comics.
+      Live site: <a href="{esc(LIVE_SITE_URL)}" target="_blank" rel="noopener">{esc(LIVE_SITE_URL)}</a>
+    </p>
+  </header>
   {status_html}
 
   <div class="layout">
+    <div class="stack">
     <section class="card">
-      <h2>Add / Replace Comic</h2>
+      <div class="section-heading">
+        <h2>Add / Replace Comic</h2>
+        <p class="hint">Fill the metadata, then upload pages in reading order.</p>
+      </div>
       <form method="post" action="/add" enctype="multipart/form-data">
-        <label for="slug">Slug</label>
-        <input id="slug" name="slug" type="text" placeholder="my-comic-episode-one" required />
-
-        <label for="title">Title</label>
-        <input id="title" name="title" type="text" placeholder="My Comic: Episode One" required />
-
-        <label for="description">Description</label>
-        <textarea id="description" name="description" placeholder="Short description"></textarea>
-
-        <label for="pages">Comic Pages (select all pages in order)</label>
-        <input id="pages" name="pages" type="file" accept="image/*" multiple required />
-
-        <label for="cover">Optional Cover Image (defaults to first page)</label>
-        <input id="cover" name="cover" type="file" accept="image/*" />
-
-        <div class="row">
-          <label><input type="checkbox" name="replace" /> Replace if slug already exists</label>
+        <div class="field">
+          <label for="slug">Slug</label>
+          <input id="slug" name="slug" type="text" placeholder="my-comic-episode-one" required />
+        </div>
+        <div class="field">
+          <label for="title">Title</label>
+          <input id="title" name="title" type="text" placeholder="My Comic: Episode One" required />
+        </div>
+        <div class="field">
+          <label for="description">Description</label>
+          <textarea id="description" name="description" placeholder="Short description"></textarea>
         </div>
 
+        <div class="upload-area">
+          <div class="field">
+            <label for="pages">Comic Pages (select all pages in order)</label>
+            <input id="pages" name="pages" type="file" accept="image/*" multiple required />
+          </div>
+          <div class="field">
+            <label for="cover">Optional Cover Image (defaults to first page)</label>
+            <input id="cover" name="cover" type="file" accept="image/*" />
+          </div>
+        </div>
+        <div class="row">
+          <label class="checkbox"><input type="checkbox" name="replace" /> Replace if slug already exists</label>
+        </div>
         <div class="row">
           <button type="submit">Add / Replace Comic</button>
           <button class="secondary" type="reset">Clear</button>
@@ -316,18 +644,21 @@ def render_page(message: str = "", is_error: bool = False) -> bytes:
     </section>
 
     <section class="card">
-      <h2>Delete Comic</h2>
+      <div class="section-heading">
+        <h2>Delete Comic</h2>
+        <p class="hint">Choose a comic slug and remove it from the library.</p>
+      </div>
       <form method="post" action="/delete">
-        <label for="delete_slug">Select Comic</label>
-        <select id="delete_slug" name="slug" required>
-          <option value="">Choose comic...</option>
-          {comic_options(comics)}
-        </select>
-
-        <div class="row">
-          <label><input type="checkbox" name="delete_files" checked /> Also delete image files in uploads/&lt;slug&gt;</label>
+        <div class="field">
+          <label for="delete_slug">Select Comic</label>
+          <select id="delete_slug" name="slug" required>
+            <option value="">Choose comic...</option>
+            {comic_options(comics)}
+          </select>
         </div>
-
+        <div class="row">
+          <label class="checkbox"><input type="checkbox" name="delete_files" checked /> Also delete files in uploads/&lt;slug&gt;</label>
+        </div>
         <div class="row">
           <button type="submit">Delete Selected Comic</button>
         </div>
@@ -336,43 +667,46 @@ def render_page(message: str = "", is_error: bool = False) -> bytes:
     </section>
 
     <section class="card">
-      <h2>Publish to GitHub</h2>
+      <div class="section-heading">
+        <h2>Publish to GitHub</h2>
+        <p class="hint">Run preflight, commit all staged changes, and push to origin/main.</p>
+      </div>
       <form method="post" action="/publish">
-        <label for="commit_message">Commit Message</label>
-        <input
-          id="commit_message"
-          name="commit_message"
-          type="text"
-          placeholder="Update comic library"
-          value="Update comic library"
-        />
-
-        <div class="row">
-          <label><input type="checkbox" name="apply_prune" checked /> Run image prune during preflight</label>
+        <div class="field">
+          <label for="commit_message">Commit Message</label>
+          <input
+            id="commit_message"
+            name="commit_message"
+            type="text"
+            placeholder="Update comic library"
+            value="Update comic library"
+          />
         </div>
-
+        <div class="row">
+          <label class="checkbox"><input type="checkbox" name="apply_prune" checked /> Run image prune during preflight</label>
+        </div>
         <div class="row">
           <button type="submit">Publish Changes</button>
         </div>
       </form>
-      <p class="hint">
-        Runs release preflight, stages all changes, creates a commit, and pushes to <code>origin/main</code>.
-      </p>
     </section>
+    </div>
 
-    {render_deployment_panel(deploy)}
+    <div class="stack">
+      {render_deployment_panel(deploy)}
 
-    <section class="card full">
-      <h2>Current Comics</h2>
-      <table>
-        <thead>
-          <tr><th>Slug</th><th>Title</th><th>Pages</th><th>Cover</th><th>Description</th></tr>
-        </thead>
-        <tbody>
-          {comic_rows(comics)}
-        </tbody>
-      </table>
-    </section>
+      <section class="card">
+        <div class="section-heading">
+          <h2>Current Comics</h2>
+          <p class="hint">Live library metadata from <code>data/comics.json</code>.</p>
+        </div>
+        <div class="comic-list">
+          {comic_cards(comics)}
+        </div>
+      </section>
+    </div>
+    </div>
+  </div>
   </div>
 </body>
 </html>
@@ -385,20 +719,25 @@ class ManagerHandler(BaseHTTPRequestHandler):
 
     def do_GET(self) -> None:  # noqa: N802
         parsed = urllib.parse.urlparse(self.path)
-        if parsed.path != "/":
-            self._send_not_found()
+
+        if parsed.path.startswith("/assets/") or parsed.path.startswith("/uploads/"):
+            self._send_static(parsed.path.lstrip("/"))
             return
 
-        params = urllib.parse.parse_qs(parsed.query)
-        message = params.get("message", [""])[0]
-        is_error = parse_bool(params.get("error", ["0"])[0])
-        body = render_page(message=message, is_error=is_error)
+        if parsed.path == "/":
+            params = urllib.parse.parse_qs(parsed.query)
+            message = params.get("message", [""])[0]
+            is_error = parse_bool(params.get("error", ["0"])[0])
+            body = render_page(message=message, is_error=is_error)
 
-        self.send_response(200)
-        self.send_header("Content-Type", "text/html; charset=utf-8")
-        self.send_header("Content-Length", str(len(body)))
-        self.end_headers()
-        self.wfile.write(body)
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
+
+        self._send_not_found()
 
     def do_POST(self) -> None:  # noqa: N802
         try:
@@ -576,6 +915,40 @@ class ManagerHandler(BaseHTTPRequestHandler):
         self.send_response(303)
         self.send_header("Location", f"/?{query}")
         self.end_headers()
+
+    def _send_static(self, relative_url_path: str) -> None:
+        decoded = urllib.parse.unquote(relative_url_path)
+        rel_path = Path(decoded)
+        if rel_path.is_absolute() or ".." in rel_path.parts:
+            self._send_not_found()
+            return
+
+        root = ROOT_DIR.resolve()
+        file_path = (ROOT_DIR / rel_path).resolve()
+
+        try:
+            file_path.relative_to(root)
+        except ValueError:
+            self._send_not_found()
+            return
+
+        if not file_path.is_file():
+            self._send_not_found()
+            return
+
+        try:
+            body = file_path.read_bytes()
+        except OSError:
+            self._send_not_found()
+            return
+
+        content_type = mimetypes.guess_type(str(file_path))[0] or "application/octet-stream"
+        self.send_response(200)
+        self.send_header("Content-Type", content_type)
+        self.send_header("Content-Length", str(len(body)))
+        self.send_header("Cache-Control", "no-cache")
+        self.end_headers()
+        self.wfile.write(body)
 
     def _send_not_found(self) -> None:
         body = b"Not Found"

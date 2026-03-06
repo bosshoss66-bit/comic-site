@@ -10,9 +10,10 @@
     <meta property="og:type" content="website" />
     <meta property="og:image" content="/uploads/marshmallow-man/cover.opt.jpg" />
     <meta name="twitter:card" content="summary_large_image" />
+    <link rel="preload" href="/assets/fonts/MochibopBold-Demo.ttf" as="font" type="font/ttf" crossorigin />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body class="reader-page">
@@ -26,23 +27,15 @@
 
     <main class="reader-wrap" id="reader-wrap">
       <section class="toolbar" aria-label="Comic controls">
-        <div class="controls-group">
-          <button id="prev-btn" type="button">Previous</button>
-          <span id="page-indicator" aria-live="polite">Page 1 of 1</span>
-          <button id="next-btn" type="button">Next</button>
-        </div>
-
-        <div class="controls-group">
-          <label for="page-jump">Jump:</label>
-          <select id="page-jump"></select>
-        </div>
-
-        <div class="controls-group">
-          <span class="zoom-label" id="zoom-label">100%</span>
-          <button id="zoom-out" type="button" aria-label="Zoom out">-</button>
-          <button id="zoom-reset" type="button">Reset</button>
-          <button id="zoom-in" type="button" aria-label="Zoom in">+</button>
-        </div>
+        <button id="prev-btn" type="button">Previous</button>
+        <span id="page-indicator" aria-live="polite">Page 1 of 1</span>
+        <button id="next-btn" type="button">Next</button>
+        <label for="page-jump">Jump:</label>
+        <select id="page-jump"></select>
+        <span class="zoom-label" id="zoom-label">100%</span>
+        <button id="zoom-out" type="button" aria-label="Zoom out">-</button>
+        <button id="zoom-reset" type="button">Reset</button>
+        <button id="zoom-in" type="button" aria-label="Zoom in">+</button>
       </section>
 
       <section class="reader-stage" id="reader-stage" aria-label="Comic page viewer">
