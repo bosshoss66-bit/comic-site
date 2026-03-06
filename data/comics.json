@@ -3,21 +3,5 @@
     "title": "Oracle Comics Library",
     "description": "A4 comic strips, published as online page readers."
   },
-  "comics": [
-    {
-      "slug": "marshmallow-man-episode-one",
-      "title": "Marshmallow Man: Episode One",
-      "description": "The first A4 chapter of Marshmallow Man.",
-      "cover": "/uploads/marshmallow-man/cover.opt.jpg",
-      "pages": [
-        "/uploads/marshmallow-man/001.opt.jpg",
-        "/uploads/marshmallow-man/002.opt.jpg",
-        "/uploads/marshmallow-man/003.opt.jpg",
-        "/uploads/marshmallow-man/004.opt.jpg",
-        "/uploads/marshmallow-man/005.opt.jpg",
-        "/uploads/marshmallow-man/006.opt.jpg",
-        "/uploads/marshmallow-man/007.opt.jpg"
-      ]
-    }
-  ]
+  "comics": []
 }
