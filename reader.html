@@ -14,26 +14,26 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="/styles.css?v=20260306-reader-mobile-3" />
+    <link rel="stylesheet" href="/styles.css?v=20260306-reader-mobile-4" />
     <style>
       html {
         -webkit-text-size-adjust: 100%;
       }
 
-      @media (max-width: 640px) {
+      @media (hover: none) and (pointer: coarse) {
         .toolbar {
-          grid-template-columns: 40% 60% !important;
+          grid-template-columns: minmax(0, 40%) minmax(0, 60%) !important;
           grid-template-areas:
             "jump nav"
             "zoom zoom" !important;
-          gap: 0.45rem 0.55rem !important;
-          padding: 0.45rem 0.55rem !important;
+          gap: 0.55rem 0.7rem !important;
+          padding: 0.55rem 0.65rem !important;
           overflow: hidden !important;
         }
 
         .toolbar-group {
           min-width: 0 !important;
-          gap: 0.35rem !important;
+          gap: 0.5rem !important;
         }
 
         .toolbar-jump {
@@ -47,14 +47,14 @@
           grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
           align-items: center !important;
           justify-content: stretch !important;
-          gap: 0.35rem !important;
+          gap: 0.5rem !important;
           width: 100% !important;
         }
 
         .toolbar-zoom {
           justify-self: stretch !important;
           justify-content: center !important;
-          gap: 0.4rem !important;
+          gap: 0.5rem !important;
           width: 100% !important;
         }
 
@@ -62,9 +62,10 @@
           min-width: 0 !important;
           width: auto !important;
           max-width: none !important;
-          min-height: 3.3rem !important;
-          padding: 0.72rem 0.9rem !important;
-          font-size: 1.2rem !important;
+          min-height: 4.4rem !important;
+          min-width: 5.2rem !important;
+          padding: 0.95rem 1rem !important;
+          font-size: 1.55rem !important;
           line-height: 1 !important;
         }
 
@@ -72,7 +73,7 @@
         #page-indicator,
         .zoom-label,
         #page-jump {
-          font-size: 1.18rem !important;
+          font-size: 1.5rem !important;
         }
 
         #prev-btn,
@@ -87,19 +88,19 @@
           width: 100% !important;
           min-width: 0 !important;
           max-width: 100% !important;
-          height: 3.3rem !important;
-          padding: 0.55rem 0.7rem !important;
+          height: 4.4rem !important;
+          padding: 0.8rem 0.9rem !important;
         }
 
         #page-indicator {
           min-width: 0 !important;
           white-space: nowrap !important;
           text-align: center !important;
-          font-size: 1.08rem !important;
+          font-size: 1.3rem !important;
         }
 
         .zoom-label {
-          min-width: 3.6rem !important;
+          min-width: 4.4rem !important;
           text-align: center !important;
         }
       }
