@@ -28,6 +28,7 @@ const ZOOM_STEP = 0.25;
 let activeComic = null;
 let activePage = 1;
 let zoomLevel = DEFAULT_ZOOM;
+let basePageWidth = 0;
 
 function parseReaderLocation() {
   const segments = window.location.pathname.split("/").filter(Boolean);
@@ -81,9 +82,30 @@ function setZoomLevel(level) {
   applyZoom();
 }
 
+function measureBasePageWidth() {
+  if (!pageImage.complete || !pageImage.naturalWidth) {
+    return;
+  }
+
+  const previousWidth = pageImage.style.width;
+  const previousMaxWidth = pageImage.style.maxWidth;
+
+  pageImage.style.width = "100%";
+  pageImage.style.maxWidth = "1200px";
+  basePageWidth = pageImage.getBoundingClientRect().width;
+
+  pageImage.style.width = previousWidth;
+  pageImage.style.maxWidth = previousMaxWidth;
+}
+
 function applyZoom() {
-  pageImage.style.width = `${Math.round(zoomLevel * 100)}%`;
-  pageImage.style.maxWidth = zoomLevel > DEFAULT_ZOOM ? "none" : "1200px";
+  if (basePageWidth > 0) {
+    pageImage.style.width = `${Math.round(basePageWidth * zoomLevel)}px`;
+    pageImage.style.maxWidth = "none";
+  } else {
+    pageImage.style.width = `${Math.round(zoomLevel * 100)}%`;
+    pageImage.style.maxWidth = zoomLevel > DEFAULT_ZOOM ? "none" : "1200px";
+  }
   zoomLabel.textContent = `${Math.round(zoomLevel * 100)}%`;
   zoomOutBtn.disabled = zoomLevel <= MIN_ZOOM;
   zoomInBtn.disabled = zoomLevel >= MAX_ZOOM;
@@ -100,6 +122,7 @@ function setPage(page, updateHistory = true) {
     ? getOptimizedCandidate(originalSource)
     : originalSource;
 
+  basePageWidth = 0;
   pageImage.src = imageSource;
   applyImageFallback(pageImage, originalSource);
   pageImage.alt = `${activeComic.title} page ${activePage}`;
@@ -162,6 +185,24 @@ function attachEvents() {
     if (event.key === "ArrowRight") {
       goToNext();
     }
+  });
+
+  pageImage.addEventListener("load", () => {
+    requestAnimationFrame(() => {
+      measureBasePageWidth();
+      applyZoom();
+    });
+  });
+
+  window.addEventListener("resize", () => {
+    if (zoomLevel !== DEFAULT_ZOOM) {
+      return;
+    }
+
+    requestAnimationFrame(() => {
+      measureBasePageWidth();
+      applyZoom();
+    });
   });
 }
 
