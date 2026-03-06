@@ -10,12 +10,12 @@ from __future__ import annotations
 import cgi
 import html
 import mimetypes
+import platform
 import socket
 import socketserver
 import subprocess
 import tempfile
 import urllib.parse
-import webbrowser
 from http.server import BaseHTTPRequestHandler
 from pathlib import Path
 from typing import Any
@@ -976,6 +976,22 @@ def find_port(start_port: int) -> int:
     raise RuntimeError("Could not find an open local port.")
 
 
+def open_browser_url(url: str) -> None:
+    try:
+        if platform.system() == "Darwin":
+            subprocess.run(["open", url], check=False)
+            return
+    except Exception:
+        pass
+
+    try:
+        import webbrowser
+
+        webbrowser.open(url)
+    except Exception:
+        pass
+
+
 def main() -> int:
     port = find_port(DEFAULT_PORT)
     url = f"http://{HOST}:{port}"
@@ -985,10 +1001,7 @@ def main() -> int:
         print(f"Open: {url}")
         print("Press Ctrl+C to stop.")
 
-        try:
-            webbrowser.open(url)
-        except Exception:
-            pass
+        open_browser_url(url)
 
         try:
             httpd.serve_forever()
