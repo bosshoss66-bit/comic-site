@@ -27,6 +27,10 @@ body {
   padding: 0;
 }
 
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
   min-height: 100vh;
   color: var(--ink);
@@ -447,11 +451,11 @@ select:focus-visible {
 
   .toolbar button {
     min-width: 0;
-    min-height: 2.9rem;
-    min-width: 4.5rem;
+    min-height: 3.25rem;
+    min-width: 4.6rem;
     max-width: none;
-    padding: 0.72rem 1rem;
-    font-size: 1.05rem;
+    padding: 0.78rem 0.95rem;
+    font-size: 1.1rem;
     line-height: 1.1;
   }
 
@@ -459,28 +463,41 @@ select:focus-visible {
   #page-indicator,
   .zoom-label,
   #page-jump {
-    font-size: 1rem;
+    font-size: 1.08rem;
   }
 
   #page-jump {
-    min-width: 7.2rem;
+    min-width: 7.6rem;
     max-width: none;
-    height: 2.9rem;
-    padding: 0.45rem 0.6rem;
+    height: 3.25rem;
+    padding: 0.55rem 0.65rem;
   }
 
   #page-indicator {
     min-width: 0;
-    font-size: 1rem;
+    font-size: 1.05rem;
     white-space: nowrap;
   }
 
   .zoom-label {
-    min-width: 3.6rem;
+    min-width: 4rem;
   }
 
   .toolbar label {
     white-space: nowrap;
+  }
+
+  .reader-footer .back-link {
+    font-size: 1.1rem;
+    line-height: 1.1;
+  }
+
+  #prev-btn,
+  #next-btn,
+  #zoom-in,
+  #zoom-reset,
+  #zoom-out {
+    flex: 0 0 auto;
   }
 
   .reader-stage {
@@ -494,6 +511,83 @@ select:focus-visible {
   .section-heading-row {
     flex-direction: column;
     align-items: flex-start;
+  }
+}
+
+@media (max-width: 640px) {
+  .toolbar {
+    grid-template-columns: minmax(0, 40%) minmax(0, 60%);
+    grid-template-areas:
+      "jump nav"
+      "zoom zoom";
+    gap: 0.45rem 0.55rem;
+    padding: 0.45rem 0.55rem;
+    overflow: hidden;
+  }
+
+  .toolbar-group {
+    min-width: 0;
+    gap: 0.35rem;
+  }
+
+  .toolbar-jump {
+    justify-content: flex-start;
+    justify-self: stretch;
+    width: 100%;
+  }
+
+  .toolbar-nav {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    justify-content: stretch;
+    gap: 0.35rem;
+    width: 100%;
+  }
+
+  .toolbar-zoom {
+    justify-self: stretch;
+    justify-content: center;
+    gap: 0.35rem;
+    width: 100%;
+  }
+
+  .toolbar button {
+    min-height: 3.05rem;
+    min-width: 4.35rem;
+    padding: 0.7rem 0.8rem;
+    font-size: 1.06rem;
+    line-height: 1;
+  }
+
+  .toolbar label,
+  #page-indicator,
+  .zoom-label,
+  #page-jump {
+    font-size: 1.02rem;
+  }
+
+  #page-jump {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    height: 3.05rem;
+    padding: 0.6rem 0.7rem;
+  }
+
+  #page-indicator {
+    min-width: 0;
+    text-align: center;
+    font-size: 0.96rem;
+  }
+
+  .zoom-label {
+    min-width: 3.5rem;
+    text-align: center;
+  }
+
+  .reader-footer .back-link {
+    font-size: 1.06rem;
   }
 }
 
